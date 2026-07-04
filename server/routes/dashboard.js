@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
             as: 'endpoint',
           },
         },
-        { $unwind: { path: '$endpoint', preserveNullAndEmpty: true } },
+        { $unwind: { path: '$endpoint', preserveNullAndEmptyArrays: true } },
       ]).toArray(),
 
       // Per-endpoint record counts
