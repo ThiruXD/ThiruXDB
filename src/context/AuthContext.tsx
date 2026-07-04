@@ -15,8 +15,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const ADMIN_CREDENTIALS = {
-  username: import.meta.env.VITE_ADMIN_USERNAME || ['ad', 'min'].join(''),
-  password: import.meta.env.VITE_ADMIN_PASS || ['ad', 'min', '123'].join(''),
+  username: import.meta.env.VITE_ADMIN_USERNAME,
+  password: import.meta.env.VITE_ADMIN_PASS,
 };
 
 const SESSION_KEY = 'thiruxdb_auth_session';
