@@ -24,15 +24,16 @@ export function DataBrowserPage() {
   const [pageSize, setPageSize] = useState(25);
 
   const [selectedRecord, setSelectedRecord] = useState<DataRecord | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('grid');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [activeCollection, setActiveCollection] = useState<string | null>(null);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
   useEffect(() => { loadEndpoints(); }, []);
-  useEffect(() => { loadRecords(); }, [page, pageSize, selectedEndpoint, dateFrom, dateTo]);
+  useEffect(() => { if (activeCollection !== null) loadRecords(); }, [page, pageSize, selectedEndpoint, dateFrom, dateTo, activeCollection]);
 
   const loadEndpoints = async () => {
     try {
@@ -44,9 +45,11 @@ export function DataBrowserPage() {
   };
 
   const loadRecords = async () => {
+    if (activeCollection === null) return;
     setIsLoading(true);
     try {
-      const result = await api.getRecords({ page, pageSize, endpoint_id: selectedEndpoint, date_from: dateFrom, date_to: dateTo });
+      const collectionParam = activeCollection === 'all' || activeCollection === 'uncategorized' ? undefined : activeCollection;
+      const result = await api.getRecords({ page, pageSize, endpoint_id: selectedEndpoint, collection_name: collectionParam, date_from: dateFrom, date_to: dateTo });
       setRecords(result.data);
       setTotalCount(result.count);
     } catch (err) {
@@ -160,17 +163,53 @@ export function DataBrowserPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Data Browser</h1>
-          <p className="text-slate-400 mt-1">{totalCount.toLocaleString()} records</p>
+        <div className="flex items-center gap-4">
+          {activeCollection !== null && (
+            <button onClick={() => { setActiveCollection(null); setRecords([]); setTotalCount(0); }} className="p-2 bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-slate-700 transition" title="Back to Collections">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold text-white">Data Browser</h1>
+            {activeCollection !== null && (
+              <p className="text-slate-400 mt-1">{totalCount.toLocaleString()} records {activeCollection !== 'all' ? `in ${activeCollection}` : ''}</p>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={loadRecords} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition" title="Refresh"><RefreshCw className="w-5 h-5" /></button>
-          <button onClick={() => setViewMode(viewMode === 'table' ? 'grid' : 'table')} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition">{viewMode === 'table' ? <Grid className="w-5 h-5" /> : <Table className="w-5 h-5" />}</button>
-          <button onClick={() => handleExport('csv')} className="flex items-center gap-2 px-3 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition"><Download className="w-4 h-4" />CSV</button>
-          <button onClick={() => handleExport('json')} className="flex items-center gap-2 px-3 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition"><FileJson className="w-4 h-4" />JSON</button>
-        </div>
+        {activeCollection !== null && (
+          <div className="flex items-center gap-2">
+            <button onClick={loadRecords} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition" title="Refresh"><RefreshCw className="w-5 h-5" /></button>
+            <button onClick={() => setViewMode(viewMode === 'table' ? 'grid' : 'table')} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition">{viewMode === 'table' ? <Grid className="w-5 h-5" /> : <Table className="w-5 h-5" />}</button>
+            <button onClick={() => handleExport('csv')} className="flex items-center gap-2 px-3 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition"><Download className="w-4 h-4" />CSV</button>
+            <button onClick={() => handleExport('json')} className="flex items-center gap-2 px-3 py-2 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition"><FileJson className="w-4 h-4" />JSON</button>
+          </div>
+        )}
       </div>
+
+      {activeCollection === null ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div onClick={() => setActiveCollection('all')} className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 cursor-pointer hover:border-blue-500 transition group flex flex-col items-center justify-center text-center gap-3">
+             <Database className="w-10 h-10 text-slate-500 group-hover:text-blue-400 transition" />
+             <h3 className="text-lg font-semibold text-white">All Records</h3>
+             <p className="text-sm text-slate-400">View all endpoints</p>
+          </div>
+          {Object.keys(endpointsByCollection.grouped).map(col => (
+            <div key={col} onClick={() => setActiveCollection(col)} className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 cursor-pointer hover:border-blue-500 transition group flex flex-col items-center justify-center text-center gap-3">
+               <Database className="w-10 h-10 text-slate-500 group-hover:text-blue-400 transition" />
+               <h3 className="text-lg font-semibold text-white">{col}</h3>
+               <p className="text-sm text-slate-400">{endpointsByCollection.grouped[col].length} Endpoints</p>
+            </div>
+          ))}
+          {endpointsByCollection.others.length > 0 && (
+            <div onClick={() => setActiveCollection('uncategorized')} className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 cursor-pointer hover:border-blue-500 transition group flex flex-col items-center justify-center text-center gap-3">
+               <Database className="w-10 h-10 text-slate-500 group-hover:text-blue-400 transition" />
+               <h3 className="text-lg font-semibold text-white">Uncategorized</h3>
+               <p className="text-sm text-slate-400">{endpointsByCollection.others.length} Endpoints</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
 
       {/* Search and Filters */}
       <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
@@ -291,17 +330,38 @@ export function DataBrowserPage() {
           </div>
         </div>
       ) : (
+        <>
+        <div className="flex items-center justify-between bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={records.length > 0 && selectedIds.size === records.length}
+              onChange={(e) => handleSelectAll(e.target.checked)}
+              className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
+            />
+            <span className="text-slate-300 font-medium">Select All Current Page</span>
+          </label>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {records.map((record) => (
-            <div key={record.id} onClick={() => setSelectedRecord(record)} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 hover:border-slate-600 cursor-pointer transition">
-              <div className="flex items-center justify-between mb-3">
+            <div key={record.id} onClick={() => setSelectedRecord(record)} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 hover:border-slate-600 cursor-pointer transition relative">
+              <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(record.id)}
+                  onChange={(e) => handleSelectOne(record.id, e.target.checked)}
+                  className="w-5 h-5 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500 cursor-pointer"
+                />
+              </div>
+              <div className="flex items-center justify-between mb-3 pr-8">
                 <span className="text-xs text-slate-500">{getEndpointName(record.endpoint_id)}</span>
                 <span className="text-xs text-slate-600">{new Date(record.fetched_at).toLocaleDateString()}</span>
               </div>
-              <pre className="text-sm text-slate-300 overflow-hidden max-h-32 font-mono">{JSON.stringify(record.mapped_data, null, 2).slice(0, 200)}...</pre>
+              <pre className="text-sm text-slate-300 overflow-hidden max-h-32 font-mono">{JSON.stringify(viewMode === 'grid' ? record.raw_data : record.mapped_data, null, 2).slice(0, 200)}...</pre>
             </div>
           ))}
         </div>
+        </>
       )}
 
       {/* Pagination */}
@@ -320,6 +380,8 @@ export function DataBrowserPage() {
           </div>
         </div>
       )}
+      </>
+      )}
 
       {selectedRecord && (
         <RecordDetailModal record={selectedRecord} endpointName={getEndpointName(selectedRecord.endpoint_id)} onClose={() => setSelectedRecord(null)} onDeleted={() => { setSelectedRecord(null); loadRecords(); }} />
@@ -329,7 +391,7 @@ export function DataBrowserPage() {
 }
 
 function RecordDetailModal({ record, endpointName, onClose, onDeleted }: { record: DataRecord; endpointName: string; onClose: () => void; onDeleted: () => void }) {
-  const [view, setView] = useState<'mapped' | 'raw'>('mapped');
+  const [view, setView] = useState<'mapped' | 'raw'>('raw');
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState(JSON.stringify(record.mapped_data, null, 2));
   const [isSaving, setIsSaving] = useState(false);

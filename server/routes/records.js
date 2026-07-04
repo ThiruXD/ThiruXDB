@@ -16,6 +16,10 @@ router.get('/', async (req, res) => {
     const filter = {};
     if (req.query.endpoint_id && req.query.endpoint_id !== 'all') {
       filter.endpoint_id = new ObjectId(req.query.endpoint_id);
+    } else if (req.query.collection_name && req.query.collection_name !== 'all') {
+      const endpoints = await db.collection('api_endpoints').find({ collection_name: req.query.collection_name }).toArray();
+      const endpointIds = endpoints.map(e => e._id);
+      filter.endpoint_id = { $in: endpointIds };
     }
     if (req.query.date_from) {
       filter.fetched_at = { ...filter.fetched_at, $gte: new Date(req.query.date_from) };
@@ -51,6 +55,10 @@ router.get('/search', async (req, res) => {
     const filter = { $text: { $search: q } };
     if (req.query.endpoint_id && req.query.endpoint_id !== 'all') {
       filter.endpoint_id = new ObjectId(req.query.endpoint_id);
+    } else if (req.query.collection_name && req.query.collection_name !== 'all') {
+      const endpoints = await db.collection('api_endpoints').find({ collection_name: req.query.collection_name }).toArray();
+      const endpointIds = endpoints.map(e => e._id);
+      filter.endpoint_id = { $in: endpointIds };
     }
 
     const [docs, total] = await Promise.all([

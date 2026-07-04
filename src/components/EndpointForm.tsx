@@ -116,8 +116,8 @@ export function EndpointForm({ endpoint, onSave, onCancel }: EndpointFormProps) 
                 <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputCls} placeholder="My API" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Collection Name</label>
-                <input type="text" value={formData.collection_name} onChange={(e) => setFormData({ ...formData, collection_name: e.target.value })} className={inputCls} placeholder="e.g. Movies, Users" />
+                <label className="block text-sm font-medium text-slate-300 mb-2">Collection Name *</label>
+                <input type="text" value={formData.collection_name} onChange={(e) => setFormData({ ...formData, collection_name: e.target.value })} className={inputCls} placeholder="e.g. Movies, Users" required />
               </div>
             </div>
 

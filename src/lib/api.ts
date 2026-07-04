@@ -66,6 +66,7 @@ export const api = {
     page?: number;
     pageSize?: number;
     endpoint_id?: string;
+    collection_name?: string;
     date_from?: string;
     date_to?: string;
   }): Promise<{ data: DataRecord[]; count: number }> => {
@@ -73,6 +74,7 @@ export const api = {
     if (params.page) q.set('page', String(params.page));
     if (params.pageSize) q.set('pageSize', String(params.pageSize));
     if (params.endpoint_id) q.set('endpoint_id', params.endpoint_id);
+    if (params.collection_name) q.set('collection_name', params.collection_name);
     if (params.date_from) q.set('date_from', params.date_from);
     if (params.date_to) q.set('date_to', params.date_to);
     return request(`/records?${q.toString()}`);
@@ -83,11 +85,13 @@ export const api = {
     page?: number;
     pageSize?: number;
     endpoint_id?: string;
+    collection_name?: string;
   }): Promise<{ data: DataRecord[]; count: number }> => {
     const q = new URLSearchParams({ q: params.q });
     if (params.page) q.set('page', String(params.page));
     if (params.pageSize) q.set('pageSize', String(params.pageSize));
     if (params.endpoint_id) q.set('endpoint_id', params.endpoint_id);
+    if (params.collection_name) q.set('collection_name', params.collection_name);
     return request(`/records/search?${q.toString()}`);
   },
 
