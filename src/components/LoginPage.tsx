@@ -88,7 +88,7 @@ export function LoginPage() {
           </form>
 
           <p className="text-center text-slate-500 text-sm mt-6">
-            Demo: admin / admin123
+            Lets Make Fun with ThiruXDB!
           </p>
         </div>
       </div>
