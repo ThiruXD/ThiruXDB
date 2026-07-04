@@ -92,6 +92,8 @@ Edit `.env`:
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
 MONGODB_DB=thiruXDB
 PORT=3001
+ADMIN_USERNAME=your_username_here
+ADMIN_PASS=your_password_here
 ```
 
 > **Note:** Bun loads `.env` automatically — no `dotenv` package required.
@@ -114,8 +116,8 @@ Default credentials (change in `src/context/AuthContext.tsx`):
 
 | Field | Value |
 |---|---|
-| Username | `admin` |
-| Password | `admin123` |
+| Username | `your_username` |
+| Password | `your_password` |
 
 ---
 
