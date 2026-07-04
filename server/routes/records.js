@@ -124,6 +124,15 @@ router.post('/', async (req, res) => {
             _search_text: searchText,
           },
         });
+        
+        if (req.body.collection_name) {
+          await db.collection(req.body.collection_name).updateOne(
+            { external_id: externalId },
+            { $set: { raw_data: req.body.raw_data, mapped_data: req.body.mapped_data || {}, updated_at: now, fetched_at: now, endpoint_id: endpointId } },
+            { upsert: true }
+          );
+        }
+        
         return res.json({ action: 'updated' });
       }
     }
@@ -139,6 +148,19 @@ router.post('/', async (req, res) => {
       updated_at: now,
     };
     await db.collection(COL).insertOne(doc);
+
+    if (req.body.collection_name) {
+      await db.collection(req.body.collection_name).insertOne({
+        endpoint_id: endpointId,
+        external_id: externalId,
+        raw_data: req.body.raw_data,
+        mapped_data: req.body.mapped_data || {},
+        fetched_at: now,
+        created_at: now,
+        updated_at: now,
+      });
+    }
+
     res.status(201).json({ action: 'created' });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -36,7 +36,7 @@ class FetchStore {
     return this.cancelTokens[id] === true;
   }
 
-  async startFetch(endpoint: ApiEndpoint, onComplete?: () => void) {
+  async startFetch(endpoint: ApiEndpoint, skipOffset: number = 0, onComplete?: () => void) {
     if (this.fetchingIds.has(endpoint.id)) return;
 
     this.fetchingIds.add(endpoint.id);
@@ -70,7 +70,11 @@ class FetchStore {
         for (const path of endpoint.response_path.split('.')) data = data?.[path];
       }
 
-      const items = Array.isArray(data) ? data : [data].filter(Boolean);
+      let items = Array.isArray(data) ? data : [data].filter(Boolean);
+      if (skipOffset > 0) {
+        items = items.slice(skipOffset);
+      }
+      
       recordsFetched = items.length;
       const mappings = endpoint.field_mappings as Array<{ sourceField: string; targetField: string; transform?: string }> | null;
 
@@ -106,7 +110,13 @@ class FetchStore {
             }
           }
         }
-        const result = await api.upsertRecord({ endpoint_id: endpoint.id, external_id: externalId, raw_data: item, mapped_data: mappedData });
+        const result = await api.upsertRecord({ 
+          endpoint_id: endpoint.id, 
+          collection_name: endpoint.collection_name,
+          external_id: externalId, 
+          raw_data: item, 
+          mapped_data: mappedData 
+        });
         if (result.action === 'updated') recordsUpdated++; else recordsCreated++;
 
         if (i % 5 === 0 || i === items.length - 1) {
@@ -153,7 +163,7 @@ export function useFetchStore() {
   return {
     fetchingIds: state.fetchingIds,
     fetchProgress: state.fetchProgress,
-    startFetch: (endpoint: ApiEndpoint, onComplete?: () => void) => fetchStore.startFetch(endpoint, onComplete),
+    startFetch: (endpoint: ApiEndpoint, skipOffset: number = 0, onComplete?: () => void) => fetchStore.startFetch(endpoint, skipOffset, onComplete),
     cancelFetch: (id: string) => fetchStore.cancelFetch(id),
   };
 }

@@ -12,6 +12,8 @@ export function FetchPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchingAll, setFetchingAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [globalSkip, setGlobalSkip] = useState<number>(0);
+  const [skipOffsets, setSkipOffsets] = useState<Record<string, number>>({});
   
   const { fetchingIds, fetchProgress, startFetch, cancelFetch } = useFetchStore();
 
@@ -33,7 +35,7 @@ export function FetchPage() {
   };
 
   const fetchFromEndpoint = async (endpoint: ApiEndpoint) => {
-    await startFetch(endpoint, loadData);
+    await startFetch(endpoint, skipOffsets[endpoint.id] || 0, loadData);
   };
 
   const handleCancelFetch = (id: string) => {
@@ -54,7 +56,7 @@ export function FetchPage() {
   const fetchSelectedEndpoints = async () => {
     setFetchingAll(true);
     const selectedEndpoints = endpoints.filter(e => selectedIds.has(e.id));
-    for (const ep of selectedEndpoints) await fetchFromEndpoint(ep);
+    for (const ep of selectedEndpoints) await startFetch(ep, globalSkip, loadData);
     setFetchingAll(false);
   };
 
@@ -67,10 +69,16 @@ export function FetchPage() {
           <h1 className="text-2xl font-bold text-white">Fetch Data</h1>
           <p className="text-slate-400 mt-1">Pull data from configured API endpoints</p>
         </div>
-        <button onClick={fetchSelectedEndpoints} disabled={fetchingAll || selectedIds.size === 0} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg shadow-green-500/20 disabled:opacity-50">
-          {fetchingAll ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
-          Fetch Selected ({selectedIds.size})
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-1.5">
+            <span className="text-sm text-slate-400">Skip</span>
+            <input type="number" min="0" value={globalSkip} onChange={(e) => setGlobalSkip(parseInt(e.target.value) || 0)} className="w-16 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+          <button onClick={fetchSelectedEndpoints} disabled={fetchingAll || selectedIds.size === 0} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg shadow-green-500/20 disabled:opacity-50">
+            {fetchingAll ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
+            Fetch Selected ({selectedIds.size})
+          </button>
+        </div>
       </div>
 
       {endpoints.length === 0 ? (
@@ -129,6 +137,14 @@ export function FetchPage() {
                             </div>
                           )}
                           {!isFetching && endpoint.last_fetched_at && <span className="text-sm text-slate-500 flex items-center gap-1"><Clock className="w-4 h-4" />{new Date(endpoint.last_fetched_at).toLocaleString()}</span>}
+                          
+                          {!isFetching && (
+                            <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1">
+                              <span className="text-xs text-slate-400">Skip</span>
+                              <input type="number" min="0" value={skipOffsets[endpoint.id] || 0} onChange={(e) => setSkipOffsets({ ...skipOffsets, [endpoint.id]: parseInt(e.target.value) || 0 })} className="w-14 bg-slate-700 border border-slate-600 rounded px-1.5 py-1 text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            </div>
+                          )}
+
                           {isFetching ? (
                             <button onClick={() => handleCancelFetch(endpoint.id)} className="flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-400 hover:bg-red-600/30 rounded-lg transition shadow-lg shadow-red-500/20">
                               <XCircle className="w-5 h-5" />

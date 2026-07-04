@@ -100,6 +100,7 @@ export const api = {
 
   upsertRecord: (data: {
     endpoint_id: string;
+    collection_name?: string | null;
     external_id: string | null;
     raw_data: unknown;
     mapped_data: unknown;
