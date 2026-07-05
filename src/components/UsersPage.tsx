@@ -15,7 +15,8 @@ import {
   Save,
   X,
   Download,
-  MapPin
+  MapPin,
+  Search
 } from 'lucide-react';
 
 export function UsersPage() {
