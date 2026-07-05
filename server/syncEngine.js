@@ -22,7 +22,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
   };
   let lastFlush = 0;
 
-  const flushState = async (force = false) => {
+  const flushState = (force = false) => {
     const now = Date.now();
     if (force || now - lastFlush > 500) {
       lastFlush = now;
@@ -36,16 +36,16 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
         error: jobState.error,
         updated_at: new Date()
       };
-
-      const result = await db.collection('sync_jobs').findOneAndUpdate(
+      
+      db.collection('sync_jobs').findOneAndUpdate(
         { endpoint_id: endpointIdStr },
         { $set: updatePayload },
         { returnDocument: 'after' }
-      );
-
-      if (result && result.cancelled) {
-        jobState.cancelled = true;
-      }
+      ).then(result => {
+        if (result && result.cancelled) {
+          jobState.cancelled = true;
+        }
+      }).catch(err => console.error('Background flush error:', err));
     }
   };
 
@@ -98,11 +98,11 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
     } else {
       jobState.total = 1;
     }
-    await flushState(true);
+    flushState(true);
 
     let urlIndex = 0;
     for (const url of urls) {
-      await flushState();
+      flushState();
       if (jobState.cancelled) {
         errorMessage = 'Cancelled by user';
         status = 'partial';
@@ -115,7 +115,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
         jobState.download_loaded = 0;
         jobState.download_total = 0;
         jobState.download_speed = 0;
-        await flushState(true);
+        flushState(true);
 
         const response = await fetch(url, { headers });
         if (!response.ok) {
@@ -123,7 +123,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
           urlIndex++;
           if (isMultiUrl) jobState.current = urlIndex;
           jobState.status = 'running';
-          await flushState(true);
+          flushState(true);
           continue;
         }
 
@@ -139,7 +139,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
         let lastLoaded = 0;
 
         while (true) {
-          await flushState();
+          flushState();
           if (jobState.cancelled) break;
           const { done, value } = await reader.read();
           if (done) break;
@@ -164,7 +164,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
         }
 
         jobState.status = 'running';
-        await flushState(true);
+        flushState(true);
 
         const bodyStr = Buffer.concat(chunks).toString('utf-8');
         const jsonData = JSON.parse(bodyStr);
@@ -179,20 +179,20 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
         }
         if (!isMultiUrl) {
           jobState.total = items.length;
-          await flushState(true);
+          flushState(true);
         }
       } catch (err) {
         console.error(`Error fetching ${url}: ${err.message}`);
         urlIndex++;
         if (isMultiUrl) jobState.current = urlIndex;
-        await flushState(true);
+        flushState(true);
         continue;
       }
 
       recordsFetched += items.length;
 
       for (let i = 0; i < items.length; i++) {
-        await flushState();
+        flushState();
         if (jobState.cancelled) {
           errorMessage = 'Cancelled by user';
           status = 'partial';
@@ -272,7 +272,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
       } else {
         jobState.current = items.length;
       }
-      await flushState(true);
+      flushState(true);
 
     }
 
@@ -286,7 +286,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
     status = errorMessage ? 'error' : 'completed';
   }
   jobState.status = status;
-  await flushState(true);
+  flushState(true);
 
   try {
     const url = process.env.NETLIFY ? `https://${process.env.URL || 'localhost:3001'}/api/logs` : `http://localhost:${process.env.PORT || 3001}/api/logs`;
