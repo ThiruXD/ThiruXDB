@@ -70,6 +70,35 @@ router.post('/', async (req, res) => {
   }
 });
 
+// DELETE /api/logs/all — clear all fetch logs
+router.delete('/all', async (req, res) => {
+  try {
+    const db = getDb();
+    const filter = {};
+    if (req.query.endpoint_id && req.query.endpoint_id !== 'all') {
+      filter.endpoint_id = new ObjectId(req.query.endpoint_id);
+    }
+    const result = await db.collection(COL).deleteMany(filter);
+    res.json({ success: true, deletedCount: result.deletedCount });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/logs/:id — delete a specific fetch log
+router.delete('/:id', async (req, res) => {
+  try {
+    const db = getDb();
+    const result = await db.collection(COL).deleteOne({ _id: new ObjectId(req.params.id) });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Log not found' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 function toClient(doc) {
   if (!doc) return null;
   const { _id, endpoint_id, ...rest } = doc;

@@ -160,6 +160,14 @@ export const api = {
   }): Promise<FetchLog> =>
     request('/logs', { method: 'POST', body: JSON.stringify(data) }),
 
+  deleteLog: (id: string): Promise<{ success: boolean }> =>
+    request(`/logs/${id}`, { method: 'DELETE' }),
+
+  clearLogs: (endpointId?: string): Promise<{ success: boolean; deletedCount: number }> => {
+    const query = endpointId && endpointId !== 'all' ? `?endpoint_id=${endpointId}` : '';
+    return request(`/logs/all${query}`, { method: 'DELETE' });
+  },
+
   // Sync Engine
   startSync: (id: string, skipOffset: number = 0): Promise<{ message: string }> =>
     request(`/endpoints/${id}/sync`, { method: 'POST', body: JSON.stringify({ skipOffset }) }),

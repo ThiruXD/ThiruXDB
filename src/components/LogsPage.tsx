@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { FetchLog, ApiEndpoint } from '../types/database';
 import { api } from '../lib/api';
-import { RefreshCw, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { RefreshCw, CheckCircle, XCircle, AlertCircle, Trash2, Trash } from 'lucide-react';
 
 export function LogsPage() {
   const [logs, setLogs] = useState<(FetchLog & { endpoint_name: string })[]>([]);
@@ -31,6 +31,26 @@ export function LogsPage() {
       console.error('Failed to load logs:', err);
     }
     setIsLoading(false);
+  };
+
+  const handleDeleteLog = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this log?')) return;
+    try {
+      await api.deleteLog(id);
+      setLogs((prev) => prev.filter((l) => l.id !== id));
+    } catch (err) {
+      console.error('Failed to delete log:', err);
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!window.confirm('Are you sure you want to clear these logs?')) return;
+    try {
+      await api.clearLogs(selectedEndpoint);
+      setLogs([]);
+    } catch (err) {
+      console.error('Failed to clear logs:', err);
+    }
   };
 
   if (isLoading) {
@@ -63,18 +83,28 @@ export function LogsPage() {
             History of data fetch operations
           </p>
         </div>
-        <select
-          value={selectedEndpoint}
-          onChange={(e) => setSelectedEndpoint(e.target.value)}
-          className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
-        >
-          <option value="all">All Endpoints</option>
-          {endpoints.map((ep) => (
-            <option key={ep.id} value={ep.id}>
-              {ep.name}
-            </option>
-          ))}
-        </select>
+        <div className="flex gap-2">
+          <select
+            value={selectedEndpoint}
+            onChange={(e) => setSelectedEndpoint(e.target.value)}
+            className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
+          >
+            <option value="all">All Endpoints</option>
+            {endpoints.map((ep) => (
+              <option key={ep.id} value={ep.id}>
+                {ep.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleClearAll}
+            disabled={logs.length === 0}
+            className="flex items-center gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Clear All</span>
+          </button>
+        </div>
       </div>
 
       {logs.length === 0 ? (
@@ -110,6 +140,9 @@ export function LogsPage() {
                   </th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
                     Error
+                  </th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -153,6 +186,15 @@ export function LogsPage() {
                     </td>
                     <td className="px-4 py-3 text-red-400 text-sm max-w-xs truncate">
                       {log.error_message || '-'}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => handleDeleteLog(log.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Delete log"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}
