@@ -20,6 +20,7 @@ import {
   Copy,
   CheckCircle2
 } from 'lucide-react';
+import { syntaxHighlight } from '../lib/utils';
 
 export function UsersPage() {
   const { user } = useAuth();

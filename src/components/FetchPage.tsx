@@ -157,8 +157,8 @@ export function FetchPage() {
               const isFetching = fetchingIds.has(endpoint.id);
               const progress = fetchProgress[endpoint.id];
               return (
-                <div key={endpoint.id} className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <div className="flex items-start gap-4">
+                <div key={endpoint.id} className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 overflow-hidden min-w-0">
+                  <div className="flex items-start gap-4 min-w-0">
                     <div className="pt-1 shrink-0">
                       <input
                         type="checkbox"
