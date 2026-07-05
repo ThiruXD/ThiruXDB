@@ -482,7 +482,7 @@ function UserLogsModal({ user, onClose, onIpLookup }: { user: User; onClose: () 
             <button 
               onClick={handleExport}
               disabled={isExporting}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-gray-900 dark:text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition disabled:opacity-50"
             >
               {isExporting ? <span className="animate-spin">⌛</span> : <Download className="w-4 h-4" />}
               Export CSV
@@ -495,7 +495,7 @@ function UserLogsModal({ user, onClose, onIpLookup }: { user: User; onClose: () 
           {isLoading && logs.length === 0 ? (
             <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden animate-pulse">
               <div className="h-12 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"></div>
-              {[1,2,3,4].map(i => (
+              {Array.from({ length: 10 }).map((_, i) => (
                 <div key={i} className="flex border-b border-gray-200 dark:border-gray-800 p-4 gap-4">
                   <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
                   <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>

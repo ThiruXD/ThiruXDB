@@ -88,10 +88,10 @@ export function LoginPage() {
           </form>
 
           <p className="text-center text-gray-400 dark:text-gray-500 text-sm mt-6">
-            Lets Make Fun with ThiruXDB!
+            lets make fun with ThiruXDB!
           </p>
         </div>
-        
+
         {/* Copyright Strip */}
         <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400 flex flex-col items-center gap-2">
           <p>&copy; {new Date().getFullYear()} ThiruXD. All rights reserved.</p>

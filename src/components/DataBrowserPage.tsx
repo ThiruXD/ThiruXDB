@@ -283,17 +283,37 @@ export function DataBrowserPage() {
 
       {/* Data Grid/Table */}
       {isLoading ? (
-        <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden animate-pulse">
-          <div className="h-12 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"></div>
-          {[1,2,3,4,5].map(i => (
-            <div key={i} className="flex border-b border-gray-200 dark:border-gray-800 p-4 gap-4">
-              <div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded ml-auto"></div>
-            </div>
-          ))}
-        </div>
+        viewMode === 'table' ? (
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden animate-pulse">
+            <div className="h-12 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"></div>
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="flex items-center border-b border-gray-200 dark:border-gray-800 p-4 gap-6">
+                <div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded shrink-0"></div>
+                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded shrink-0"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-pulse">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 flex flex-col h-48">
+                <div className="flex justify-between items-start mb-4 gap-4">
+                  <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded shrink-0"></div>
+                </div>
+                <div className="space-y-2 mb-4 flex-1">
+                  <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-4 w-5/6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-4 w-4/6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded mt-auto"></div>
+              </div>
+            ))}
+          </div>
+        )
       ) : records.length === 0 ? (
         <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-12 text-center">
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4"><Database className="w-8 h-8 text-gray-400 dark:text-gray-500" /></div>
