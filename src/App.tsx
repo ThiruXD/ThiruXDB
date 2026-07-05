@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import { useState } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';

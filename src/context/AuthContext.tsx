@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserRole } from '../types/database';
 

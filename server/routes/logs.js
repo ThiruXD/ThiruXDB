@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import { Router } from 'express';
 import { ObjectId } from 'mongodb';
 import { getDb } from '../db.js';

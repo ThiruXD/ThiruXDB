@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 export type Json =
   | string
   | number

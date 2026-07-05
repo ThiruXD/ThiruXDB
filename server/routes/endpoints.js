@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import { runSyncJob } from '../syncEngine.js';
 import { Router } from 'express';
 import { ObjectId } from 'mongodb';
@@ -235,6 +240,10 @@ router.post('/:id/sync', async (req, res) => {
         body: JSON.stringify({ endpointIdStr: endpointId, skipOffset })
       }).catch(err => console.error('Failed to trigger background function', err));
     } else {
+      // For VPS, Vercel, Cloudflare, etc., run the job as a detached promise.
+      // Note: On standard Serverless platforms (Vercel/Cloudflare) without dedicated background workers,
+      // this may freeze between poll requests or hit platform execution timeouts.
+      // On a VPS, this will run cleanly and uninterrupted in the background.
       runSyncJob(endpointId.toString(), skipOffset).catch(err => console.error('Background job error:', err));
     }
   } catch(e) {

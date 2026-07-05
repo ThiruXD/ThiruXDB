@@ -1,4 +1,9 @@
 /**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
+/**
  * Typed API client — replaces @supabase/supabase-js.
  * All functions call the Express /api/* backend which talks to MongoDB.
  */

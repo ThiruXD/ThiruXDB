@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Lock, User, AlertCircle, Database, Github } from 'lucide-react';

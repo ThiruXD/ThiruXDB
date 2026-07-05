@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import { ObjectId } from 'mongodb';

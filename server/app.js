@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import express from 'express';
 import cors from 'cors';
 import endpointsRouter from './routes/endpoints.js';

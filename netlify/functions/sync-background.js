@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import { connectDb } from '../../server/db.js';
 import { runSyncJob } from '../../server/syncEngine.js';
 

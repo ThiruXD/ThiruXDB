@@ -70,6 +70,16 @@ ThiruXDB/
 └── package.json             # Bun scripts
 ```
 
+
+## Sync Engine Architecture & Deployment
+
+ThiruXDB uses a highly optimized, state-persistent Data Synchronization Engine designed to handle large payloads (20MB+) while gracefully tolerating Serverless environments.
+
+- **MongoDB State Tracking:** Sync progress is stored centrally in the `sync_jobs` collection. This allows multi-container Serverless environments (like Netlify or Vercel) to auto-scale without losing track of your download's progress or speed.
+- **Detached Promise Execution:** By default, the engine spins up the sync as a detached background promise. This operates flawlessly out-of-the-box on any standard **VPS** or persistent Node.js environment.
+- **Serverless Environments (Vercel & Cloudflare):** When deployed to standard serverless functions (which strictly freeze upon HTTP response), the sync engine utilizes a "freeze and thaw" mechanism. The engine will pause execution when the function sleeps, and will instantly resume exactly where it left off when the frontend's 1-second UI polling tickles the container awake. (Note: this is perfectly safe, but will result in slower download speeds compared to a VPS).
+- **Netlify Background Functions:** If `process.env.NETLIFY` is detected, the API will automatically route the sync task to a dedicated Netlify Background Function (`netlify/functions/sync-background.js`). This entirely bypasses the 10-second timeout freeze, running at full line-speed for up to 15 minutes!
+
 ---
 
 ## Getting Started

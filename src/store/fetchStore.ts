@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import { useState, useEffect } from 'react';
 import { ApiEndpoint } from '../types/database';
 import { api } from '../lib/api';

@@ -1,3 +1,8 @@
+/**
+ * Project: ThiruXDB
+ * Author: ThiruXD
+ * Description: Data Synchronization Engine
+ */
 import serverless from 'serverless-http';
 import app from '../../server/app.js';
 import { connectDb } from '../../server/db.js';
