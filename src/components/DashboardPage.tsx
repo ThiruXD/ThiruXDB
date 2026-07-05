@@ -299,29 +299,26 @@ export function DashboardPage() {
             No data to display
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {endpoints.map((endpoint) => {
               const recordCount = perEndpoint[endpoint.id] || 0;
-              const maxRecordCount = Math.max(...endpoints.map(e => perEndpoint[e.id] || 0), 1);
               const percentageOfTotal =
                 stats.totalRecords > 0
                   ? Math.round((recordCount / stats.totalRecords) * 100)
                   : 0;
-              const barWidth = Math.round((recordCount / maxRecordCount) * 100);
 
               return (
-                <div key={endpoint.id} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-300">{endpoint.name}</span>
-                    <span className="text-slate-500">
-                      {recordCount.toLocaleString()} ({percentageOfTotal}% of total)
+                <div key={endpoint.id} className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-4 flex flex-col justify-between">
+                  <span className="text-sm font-medium text-slate-300 truncate mb-2" title={endpoint.name}>
+                    {endpoint.name}
+                  </span>
+                  <div className="flex items-end justify-between">
+                    <span className="text-2xl font-bold text-white">
+                      {recordCount.toLocaleString()}
                     </span>
-                  </div>
-                  <div className="h-2 bg-slate-700/30 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full transition-all duration-500"
-                      style={{ width: `${barWidth}%` }}
-                    />
+                    <span className="text-xs font-medium px-2 py-1 bg-blue-500/10 text-blue-400 rounded-md">
+                      {percentageOfTotal}% of total db
+                    </span>
                   </div>
                 </div>
               );
