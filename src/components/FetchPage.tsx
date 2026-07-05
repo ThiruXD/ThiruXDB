@@ -203,7 +203,7 @@ export function FetchPage() {
                               Cancel
                             </button>
                           ) : (
-                            <button onClick={() => fetchSingleEndpoint(endpoint)} className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition shadow-sm w-full sm:w-auto">
+                            <button onClick={() => fetchFromEndpoint(endpoint)} className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition shadow-sm w-full sm:w-auto">
                               <RefreshCw className="w-5 h-5" />
                               Fetch
                             </button>
