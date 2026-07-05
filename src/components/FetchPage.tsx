@@ -120,7 +120,7 @@ export function FetchPage() {
                   type="checkbox"
                   checked={endpoints.length > 0 && selectedIds.size === endpoints.length}
                   onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-gray-900 dark:focus:ring-gray-100"
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-0 focus:ring-offset-0 cursor-pointer transition shadow-sm"
                 />
                 <span className="text-gray-700 dark:text-gray-300 font-medium">Select All</span>
               </label>
@@ -138,7 +138,7 @@ export function FetchPage() {
                         type="checkbox"
                         checked={selectedIds.has(endpoint.id)}
                         onChange={(e) => handleSelectOne(endpoint.id, e.target.checked)}
-                        className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-gray-900 dark:focus:ring-gray-100 cursor-pointer"
+                        className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-0 focus:ring-offset-0 cursor-pointer transition shadow-sm"
                       />
                     </div>
                     <div className="flex-1 min-w-0">

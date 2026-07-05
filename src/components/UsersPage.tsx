@@ -311,7 +311,7 @@ export function UsersPage() {
               </div>
               {editingUser && editingUser.id !== user?.id && (
                 <div className="flex items-center gap-2 pt-2">
-                  <input type="checkbox" id="active" checked={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.checked})} className="w-4 h-4 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded" />
+                  <input type="checkbox" id="active" checked={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.checked})} className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-0 focus:ring-offset-0 cursor-pointer transition shadow-sm" />
                   <label htmlFor="active" className="text-sm text-gray-700 dark:text-gray-300">Account Active</label>
                 </div>
               )}

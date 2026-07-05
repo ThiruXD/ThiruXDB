@@ -311,7 +311,7 @@ export function DataBrowserPage() {
                       type="checkbox"
                       checked={records.length > 0 && selectedIds.size === records.length}
                       onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-gray-900 dark:focus:ring-gray-100 cursor-pointer"
+                      className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-0 focus:ring-offset-0 cursor-pointer transition shadow-sm"
                     />
                   </th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">Source</th>
@@ -329,7 +329,7 @@ export function DataBrowserPage() {
                         type="checkbox"
                         checked={selectedIds.has(record.id)}
                         onChange={(e) => handleSelectOne(record.id, e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-gray-900 dark:focus:ring-gray-100 cursor-pointer"
+                        className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-0 focus:ring-offset-0 cursor-pointer transition shadow-sm"
                       />
                     </td>
                     <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
@@ -363,7 +363,7 @@ export function DataBrowserPage() {
               type="checkbox"
               checked={records.length > 0 && selectedIds.size === records.length}
               onChange={(e) => handleSelectAll(e.target.checked)}
-              className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-gray-900 dark:focus:ring-gray-100"
+              className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-0 focus:ring-offset-0 cursor-pointer transition shadow-sm"
             />
             <span className="text-gray-700 dark:text-gray-300 font-medium">Select All Current Page</span>
           </label>
@@ -376,7 +376,7 @@ export function DataBrowserPage() {
                   type="checkbox"
                   checked={selectedIds.has(record.id)}
                   onChange={(e) => handleSelectOne(record.id, e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-gray-900 dark:focus:ring-gray-100 cursor-pointer"
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-0 focus:ring-offset-0 cursor-pointer transition shadow-sm"
                 />
               </div>
               <div className="flex items-center justify-between mb-3 pr-8">
