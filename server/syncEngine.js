@@ -36,7 +36,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
         error: jobState.error,
         updated_at: new Date()
       };
-      
+
       db.collection('thiruxdb_sync_jobs').findOneAndUpdate(
         { endpoint_id: endpointIdStr },
         { $set: updatePayload },
@@ -101,7 +101,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
     flushState(true);
 
     let urlIndex = 0;
-    
+
     function createBulkOp(item) {
       let externalId = null;
       if (endpoint.id_field) externalId = item?.[endpoint.id_field]?.toString() || null;
@@ -146,7 +146,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
     if (isMultiUrl) {
       jobState.status = 'running';
       flushState(true);
-      const CONCURRENCY = 15;
+      const CONCURRENCY = 50;
 
       for (let i = 0; i < urls.length; i += CONCURRENCY) {
         if (jobState.cancelled) {
