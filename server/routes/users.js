@@ -137,7 +137,7 @@ router.get('/activity', async (req, res) => {
         }
       },
       { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } }
-    ];
+    );
 
     const logs = await db.collection('user_activity_logs').aggregate(pipeline).toArray();
     const totalQuery = req.query.user_id ? { user_id: new ObjectId(req.query.user_id) } : {};
