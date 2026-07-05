@@ -124,7 +124,7 @@ export function FetchPage() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                      <div className="flex flex-col sm:flex-row gap-4 sm:items-start justify-between">
                         <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${endpoint.last_error ? 'bg-yellow-500/20' : endpoint.last_fetched_at ? 'bg-green-500/20' : 'bg-gray-100 dark:bg-gray-700'}`}>
                             {endpoint.last_error ? <AlertCircle className="w-5 h-5 text-yellow-400" /> : endpoint.last_fetched_at ? <CheckCircle className="w-5 h-5 text-green-400" /> : <Database className="w-5 h-5 text-gray-400 dark:text-gray-500" />}

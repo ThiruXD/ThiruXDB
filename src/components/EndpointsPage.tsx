@@ -185,14 +185,14 @@ export function EndpointsPage() {
             {endpoints.map((endpoint) => (
               <div
                 key={endpoint.id}
-                className={`bg-white dark:bg-gray-800/50 border rounded-lg p-4 transition flex flex-col sm:flex-row gap-4 sm:items-start ${
+                className={`bg-white dark:bg-gray-800/50 border rounded-lg p-4 transition flex items-start gap-3 sm:gap-4 ${
                   endpoint.is_active
                     ? 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:border-gray-600'
                     : 'border-gray-200 dark:border-gray-800 opacity-60'
                 }`}
               >
                 {!isViewer && (
-                  <div className="pt-1">
+                  <div className="pt-1 shrink-0">
                     <input
                       type="checkbox"
                       checked={selectedIds.has(endpoint.id)}
@@ -201,7 +201,8 @@ export function EndpointsPage() {
                     />
                   </div>
                 )}
-                <div className="flex-1 w-full min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col sm:flex-row gap-4 sm:items-start">
+                  <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-3 mb-2">
                     <div
                       className={`w-2.5 h-2.5 rounded-full ${
@@ -238,9 +239,9 @@ export function EndpointsPage() {
                     </p>
                   )}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-400 dark:text-gray-500 min-w-0">
-                    <span className="font-mono truncate max-w-full sm:max-w-md">
+                    <p className="font-mono truncate block w-full sm:w-auto sm:max-w-md min-w-0">
                       {endpoint.base_url}
-                    </span>
+                    </p>
                     <span className="flex items-center gap-1 shrink-0">
                       {endpoint.auth_type === 'none' ? (
                         <XCircle className="w-4 h-4" />
@@ -275,9 +276,9 @@ export function EndpointsPage() {
                     </div>
                   )}
                 </div>
-
-                {!isViewer && (
-                  <div className="flex items-center justify-end w-full sm:w-auto gap-2 sm:ml-4 border-t border-gray-100 dark:border-gray-700/50 sm:border-0 pt-3 sm:pt-0">
+                
+                  {!isViewer && (
+                    <div className="flex items-center justify-end gap-2 shrink-0 border-t border-gray-100 dark:border-gray-700/50 sm:border-0 pt-3 sm:pt-0">
                     <button
                       onClick={() => handleToggleActive(endpoint)}
                       className={`p-2 rounded-lg transition ${
@@ -314,7 +315,8 @@ export function EndpointsPage() {
                   </div>
                 )}
               </div>
-            ))}
+            </div>
+          ))}
           </div>
         </>
       )}
