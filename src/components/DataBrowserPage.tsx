@@ -9,6 +9,26 @@ import {
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
+const syntaxHighlight = (json: string) => {
+  if (!json) return '';
+  let formatted = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return formatted.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+    let cls = 'text-blue-600 dark:text-blue-400'; // number
+    if (/^"/.test(match)) {
+      if (/:$/.test(match)) {
+        cls = 'text-gray-900 dark:text-gray-100 font-semibold'; // key
+      } else {
+        cls = 'text-green-600 dark:text-green-400'; // string
+      }
+    } else if (/true|false/.test(match)) {
+      cls = 'text-purple-600 dark:text-purple-400'; // boolean
+    } else if (/null/.test(match)) {
+      cls = 'text-gray-500 dark:text-gray-400 italic'; // null
+    }
+    return '<span class="' + cls + '">' + match + '</span>';
+  });
+};
+
 export function DataBrowserPage() {
   const [records, setRecords] = useState<DataRecord[]>([]);
   const [endpoints, setEndpoints] = useState<ApiEndpoint[]>([]);
@@ -418,7 +438,10 @@ export function DataBrowserPage() {
                 <span className="text-xs text-gray-400 dark:text-gray-500">{getEndpointName(record.endpoint_id)}</span>
                 <span className="text-xs text-gray-300 dark:text-gray-600">{new Date(record.fetched_at).toLocaleDateString()}</span>
               </div>
-              <pre className="text-sm text-gray-700 dark:text-gray-300 overflow-hidden max-h-32 font-mono">{JSON.stringify(viewMode === 'grid' ? record.raw_data : record.mapped_data, null, 2).slice(0, 200)}...</pre>
+              <pre 
+                className="text-sm text-gray-700 dark:text-gray-300 overflow-hidden max-h-32 font-mono"
+                dangerouslySetInnerHTML={{ __html: syntaxHighlight(JSON.stringify(viewMode === 'grid' ? record.raw_data : record.mapped_data, null, 2).slice(0, 300) + '...') }}
+              />
             </div>
           ))}
         </div>
@@ -533,7 +556,10 @@ function RecordDetailModal({ record, endpointName, onClose, onDeleted, isViewer 
               </div>
             </div>
           ) : (
-            <pre className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto font-mono text-sm text-gray-700 dark:text-gray-300">{JSON.stringify(view === 'mapped' ? record.mapped_data : record.raw_data, null, 2)}</pre>
+            <pre 
+              className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-x-auto font-mono text-sm text-gray-700 dark:text-gray-300"
+              dangerouslySetInnerHTML={{ __html: syntaxHighlight(JSON.stringify(view === 'mapped' ? record.mapped_data : record.raw_data, null, 2)) }}
+            />
           )}
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
