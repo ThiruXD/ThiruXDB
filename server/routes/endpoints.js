@@ -5,6 +5,8 @@ import { getDb } from '../db.js';
 const router = Router();
 const COL = 'api_endpoints';
 
+const activeSyncJobs = new Map();
+
 // GET /api/endpoints — list all, newest first
 router.get('/', async (req, res) => {
   try {
@@ -148,6 +150,184 @@ router.post('/bulk-delete', async (req, res) => {
     res.json({ success: true, deletedCount: ids.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// --- BACKGROUND SYNC ENGINE ---
+
+async function runSyncJob(endpointIdStr, skipOffset) {
+  const db = getDb();
+  const endpointId = new ObjectId(endpointIdStr);
+  const job = activeSyncJobs.get(endpointIdStr);
+  const startTime = Date.now();
+  let status = 'success';
+  let errorMessage = null;
+  let recordsFetched = 0, recordsCreated = 0, recordsUpdated = 0;
+
+  try {
+    const endpoint = await db.collection(COL).findOne({ _id: endpointId });
+    if (!endpoint) throw new Error('Endpoint not found');
+
+    const headers = { 'Content-Type': 'application/json' };
+    const authConfig = endpoint.auth_config || {};
+    if (endpoint.auth_type === 'bearer' && authConfig.token) {
+      headers['Authorization'] = `Bearer ${authConfig.token}`;
+    } else if (endpoint.auth_type === 'api_key') {
+      const ha = authConfig.headers;
+      if (ha) Object.assign(headers, ha);
+    } else if (endpoint.auth_type === 'basic') {
+      const { username, password } = authConfig;
+      if (username && password) headers['Authorization'] = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+    }
+
+    const response = await fetch(endpoint.base_url, { headers });
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+    const jsonData = await response.json();
+    let data = jsonData;
+    if (endpoint.response_path) {
+      for (const path of endpoint.response_path.split('.')) data = data?.[path];
+    }
+
+    let items = Array.isArray(data) ? data : [data].filter(Boolean);
+    if (skipOffset > 0) items = items.slice(skipOffset);
+
+    recordsFetched = items.length;
+    job.total = items.length;
+
+    const mappings = endpoint.field_mappings || [];
+    const targetCol = endpoint.collection_name || 'data_records';
+
+    for (let i = 0; i < items.length; i++) {
+      if (job.cancelled) {
+        errorMessage = 'Cancelled by user';
+        status = 'partial';
+        break;
+      }
+
+      const item = items[i];
+      let externalId = null;
+      if (endpoint.id_field) externalId = item?.[endpoint.id_field]?.toString() || null;
+      else externalId = item?.id?.toString() || item?._id?.toString() || null;
+
+      let mappedData = {};
+      for (const mapping of mappings) {
+        const value = item?.[mapping.sourceField];
+        if (value !== undefined) {
+          let tv = value;
+          if (mapping.transform === 'number') tv = Number(value);
+          else if (mapping.transform === 'boolean') tv = Boolean(value);
+          else if (mapping.transform === 'date') tv = new Date(value).toISOString();
+          else tv = String(value);
+          mappedData[mapping.targetField] = tv;
+        }
+      }
+
+      const now = new Date();
+      const searchText = JSON.stringify(item);
+
+      if (externalId) {
+        const filter = { endpoint_id: endpointId, external_id: externalId };
+        const existing = await db.collection(targetCol).findOne(filter);
+        if (existing) {
+          await db.collection(targetCol).updateOne(filter, {
+            $set: {
+              raw_data: item,
+              mapped_data: mappedData,
+              fetched_at: now,
+              updated_at: now,
+              _search_text: searchText,
+            },
+          });
+          recordsUpdated++;
+        } else {
+          await db.collection(targetCol).insertOne({
+            endpoint_id: endpointId,
+            external_id: externalId,
+            raw_data: item,
+            mapped_data: mappedData,
+            _search_text: searchText,
+            fetched_at: now,
+            created_at: now,
+            updated_at: now,
+          });
+          recordsCreated++;
+        }
+      } else {
+        await db.collection(targetCol).insertOne({
+          endpoint_id: endpointId,
+          external_id: null,
+          raw_data: item,
+          mapped_data: mappedData,
+          _search_text: searchText,
+          fetched_at: now,
+          created_at: now,
+          updated_at: now,
+        });
+        recordsCreated++;
+      }
+
+      job.current = i + 1;
+    }
+
+    await db.collection(COL).updateOne({ _id: endpointId }, { $set: { last_fetched_at: new Date(), last_error: null, updated_at: new Date() } });
+  } catch (err) {
+    status = 'error';
+    errorMessage = err.message;
+    job.error = errorMessage;
+    await db.collection(COL).updateOne({ _id: endpointId }, { $set: { last_error: errorMessage, updated_at: new Date() } });
+  }
+
+  await db.collection('fetch_logs').insertOne({
+    endpoint_id: endpointId,
+    status,
+    records_fetched: recordsFetched,
+    records_created: recordsCreated,
+    records_updated: recordsUpdated,
+    error_message: errorMessage,
+    duration_ms: Date.now() - startTime,
+    created_at: new Date()
+  });
+
+  job.status = 'completed';
+  setTimeout(() => activeSyncJobs.delete(endpointIdStr), 10000);
+}
+
+router.post('/:id/sync', async (req, res) => {
+  const endpointId = req.params.id;
+  const skipOffset = req.body.skipOffset || 0;
+
+  if (activeSyncJobs.has(endpointId)) {
+    return res.status(400).json({ error: 'Sync already in progress' });
+  }
+
+  activeSyncJobs.set(endpointId, {
+    status: 'running',
+    current: 0,
+    total: 0,
+    error: null,
+    cancelled: false
+  });
+
+  res.json({ message: 'Sync started' });
+
+  // Start background process detached
+  runSyncJob(endpointId, skipOffset).catch(err => console.error('Background job error:', err));
+});
+
+router.get('/:id/sync-status', (req, res) => {
+  const job = activeSyncJobs.get(req.params.id);
+  if (!job) return res.json({ status: 'idle', current: 0, total: 0 });
+  res.json(job);
+});
+
+router.post('/:id/cancel-sync', (req, res) => {
+  const job = activeSyncJobs.get(req.params.id);
+  if (job) {
+    job.cancelled = true;
+    res.json({ message: 'Cancellation requested' });
+  } else {
+    res.json({ message: 'No active job to cancel' });
   }
 });
 

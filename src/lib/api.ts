@@ -141,6 +141,16 @@ export const api = {
   }): Promise<FetchLog> =>
     request('/logs', { method: 'POST', body: JSON.stringify(data) }),
 
+  // Sync Engine
+  startSync: (id: string, skipOffset: number = 0): Promise<{ message: string }> =>
+    request(`/endpoints/${id}/sync`, { method: 'POST', body: JSON.stringify({ skipOffset }) }),
+
+  getSyncStatus: (id: string): Promise<{ status: 'idle' | 'running' | 'completed' | 'partial' | 'error'; current: number; total: number; error: string | null; cancelled: boolean }> =>
+    request(`/endpoints/${id}/sync-status`),
+
+  cancelSync: (id: string): Promise<{ message: string }> =>
+    request(`/endpoints/${id}/cancel-sync`, { method: 'POST' }),
+
   // Dashboard
   getDashboard: (): Promise<{
     system: {

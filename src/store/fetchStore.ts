@@ -7,7 +7,7 @@ type FetchProgress = { current: number; total: number };
 class FetchStore {
   fetchingIds = new Set<string>();
   fetchProgress: Record<string, FetchProgress> = {};
-  cancelTokens: Record<string, boolean> = {};
+  pollIntervals: Record<string, ReturnType<typeof setInterval>> = {};
   listeners = new Set<() => void>();
 
   subscribe(listener: () => void) {
@@ -27,118 +27,57 @@ class FetchStore {
     return this.fetchProgress[id];
   }
 
-  cancelFetch(id: string) {
-    this.cancelTokens[id] = true;
-    this.notify();
-  }
-
-  isCancelled(id: string) {
-    return this.cancelTokens[id] === true;
+  async cancelFetch(id: string) {
+    try {
+      await api.cancelSync(id);
+    } catch (err) {
+      console.error('Failed to cancel fetch:', err);
+    }
   }
 
   async startFetch(endpoint: ApiEndpoint, skipOffset: number = 0, onComplete?: () => void) {
     if (this.fetchingIds.has(endpoint.id)) return;
 
     this.fetchingIds.add(endpoint.id);
-    this.cancelTokens[endpoint.id] = false;
     this.notify();
-
-    const startTime = Date.now();
-    let status: 'success' | 'error' | 'partial' = 'success';
-    let errorMessage: string | null = null;
-    let recordsFetched = 0, recordsCreated = 0, recordsUpdated = 0;
 
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      const authConfig = endpoint.auth_config as Record<string, unknown>;
-      if (endpoint.auth_type === 'bearer' && authConfig?.token) {
-        headers['Authorization'] = `Bearer ${authConfig.token}`;
-      } else if (endpoint.auth_type === 'api_key') {
-        const ha = authConfig?.headers as Record<string, string> | undefined;
-        if (ha) Object.assign(headers, ha);
-      } else if (endpoint.auth_type === 'basic') {
-        const { username, password } = authConfig as { username?: string; password?: string };
-        if (username && password) headers['Authorization'] = `Basic ${btoa(`${username}:${password}`)}`;
-      }
+      await api.startSync(endpoint.id, skipOffset);
 
-      const response = await fetch(endpoint.base_url, { headers });
-      if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-
-      const jsonData = await response.json();
-      let data = jsonData;
-      if (endpoint.response_path) {
-        for (const path of endpoint.response_path.split('.')) data = data?.[path];
-      }
-
-      let items = Array.isArray(data) ? data : [data].filter(Boolean);
-      if (skipOffset > 0) {
-        items = items.slice(skipOffset);
-      }
-      
-      recordsFetched = items.length;
-      const mappings = endpoint.field_mappings as Array<{ sourceField: string; targetField: string; transform?: string }> | null;
-
-      this.fetchProgress[endpoint.id] = { current: 0, total: items.length };
-      this.notify();
-
-      for (let i = 0; i < items.length; i++) {
-        if (this.isCancelled(endpoint.id)) {
-          errorMessage = 'Cancelled by user';
-          status = 'partial';
-          break;
-        }
-
-        const item = items[i];
-        let externalId = null;
-        if (endpoint.id_field) {
-          externalId = item?.[endpoint.id_field]?.toString() || null;
-        } else {
-          externalId = item?.id?.toString() || item?._id?.toString() || null;
-        }
-
-        let mappedData: Record<string, unknown> = {};
-        if (mappings && mappings.length > 0) {
-          for (const mapping of mappings) {
-            const value = item?.[mapping.sourceField];
-            if (value !== undefined) {
-              let tv: unknown = value;
-              if (mapping.transform === 'number') tv = Number(value);
-              else if (mapping.transform === 'boolean') tv = Boolean(value);
-              else if (mapping.transform === 'date') tv = new Date(value).toISOString();
-              else tv = String(value);
-              mappedData[mapping.targetField] = tv;
-            }
+      // Start polling status
+      this.pollIntervals[endpoint.id] = setInterval(async () => {
+        try {
+          const status = await api.getSyncStatus(endpoint.id);
+          
+          if (status.status === 'idle') {
+            // Edge case: backend doesn't know about this job anymore
+            this.finishFetch(endpoint.id, onComplete);
+          } else if (status.status === 'running') {
+            this.fetchProgress[endpoint.id] = { current: status.current, total: status.total };
+            this.notify();
+          } else if (status.status === 'completed' || status.status === 'partial' || status.status === 'error') {
+            this.finishFetch(endpoint.id, onComplete);
           }
+        } catch (err) {
+          console.error('Failed to get sync status:', err);
+          this.finishFetch(endpoint.id, onComplete);
         }
-        const result = await api.upsertRecord({ 
-          endpoint_id: endpoint.id, 
-          collection_name: endpoint.collection_name,
-          external_id: externalId, 
-          raw_data: item, 
-          mapped_data: mappedData 
-        });
-        if (result.action === 'updated') recordsUpdated++; else recordsCreated++;
+      }, 1000);
 
-        if (i % 5 === 0 || i === items.length - 1) {
-          this.fetchProgress[endpoint.id] = { current: i + 1, total: items.length };
-          this.notify();
-        }
-      }
-
-      await api.updateEndpointStatus(endpoint.id, { last_fetched_at: new Date().toISOString(), last_error: null });
     } catch (err) {
-      status = 'error';
-      errorMessage = (err as Error).message;
-      await api.updateEndpointStatus(endpoint.id, { last_error: errorMessage });
+      console.error('Failed to start fetch:', err);
+      this.finishFetch(endpoint.id, onComplete);
     }
+  }
 
-    await api.createLog({ endpoint_id: endpoint.id, status, records_fetched: recordsFetched, records_created: recordsCreated, records_updated: recordsUpdated, error_message: errorMessage, duration_ms: Date.now() - startTime });
-    
-    this.fetchingIds.delete(endpoint.id);
-    delete this.cancelTokens[endpoint.id];
-    delete this.fetchProgress[endpoint.id];
+  private finishFetch(id: string, onComplete?: () => void) {
+    if (this.pollIntervals[id]) {
+      clearInterval(this.pollIntervals[id]);
+      delete this.pollIntervals[id];
+    }
+    this.fetchingIds.delete(id);
+    delete this.fetchProgress[id];
     this.notify();
-
     if (onComplete) onComplete();
   }
 }
