@@ -86,8 +86,8 @@ router.get('/', async (req, res) => {
       ];
 
       const [dataRes, countRes] = await Promise.all([
-        db.collection(baseCol).aggregate(dataPipeline).toArray(),
-        db.collection(baseCol).aggregate(countPipeline).toArray(),
+        db.collection(baseCol).aggregate(dataPipeline, { allowDiskUse: true }).toArray(),
+        db.collection(baseCol).aggregate(countPipeline, { allowDiskUse: true }).toArray(),
       ]);
       docs = dataRes;
       total = countRes[0] ? countRes[0].total : 0;
@@ -151,8 +151,8 @@ router.get('/search', async (req, res) => {
       const dataPipeline = [...fullPipeline, { $skip: skip }, { $limit: pageSize }];
 
       const [dataRes, countRes] = await Promise.all([
-        db.collection(baseCol).aggregate(dataPipeline).toArray(),
-        db.collection(baseCol).aggregate(countPipeline).toArray(),
+        db.collection(baseCol).aggregate(dataPipeline, { allowDiskUse: true }).toArray(),
+        db.collection(baseCol).aggregate(countPipeline, { allowDiskUse: true }).toArray(),
       ]);
       docs = dataRes;
       total = countRes[0] ? countRes[0].total : 0;
@@ -182,7 +182,7 @@ router.get('/counts', async (req, res) => {
       },
     });
 
-    const results = await db.collection(baseCol).aggregate(fullPipeline).toArray();
+    const results = await db.collection(baseCol).aggregate(fullPipeline, { allowDiskUse: true }).toArray();
     const total = results.reduce((sum, r) => sum + r.count, 0);
     const perEndpoint = {};
     for (const r of results) {

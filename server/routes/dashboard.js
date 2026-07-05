@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
       db.collection('thiruxdb_fetch_logs').aggregate([
         { $match: { created_at: { $gte: weekAgo } } },
         { $group: { _id: null, count: { $sum: '$records_created' } } }
-      ]).toArray(),
+      ], { allowDiskUse: true }).toArray(),
 
       // 5 most recent records
       // Note: we fetch recent logs for the dashboard instead of scanning across all collections for recent records
@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
           },
         },
         { $unwind: { path: '$endpoint', preserveNullAndEmptyArrays: true } },
-      ]).toArray(),
+      ], { allowDiskUse: true }).toArray(),
     ]);
 
     // Build perEndpoint count map and totalRecords

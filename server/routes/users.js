@@ -144,7 +144,7 @@ router.get('/activity', async (req, res) => {
       { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } }
     );
 
-    const logs = await db.collection('thiruxdb_user_activity_logs').aggregate(pipeline).toArray();
+    const logs = await db.collection('thiruxdb_user_activity_logs').aggregate(pipeline, { allowDiskUse: true }).toArray();
     const totalQuery = req.query.user_id ? { user_id: new ObjectId(req.query.user_id) } : {};
     const total = await db.collection('thiruxdb_user_activity_logs').countDocuments(totalQuery);
 
