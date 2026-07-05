@@ -39,7 +39,7 @@ async function runSyncJob(endpointIdStr, skipOffset) {
         updated_at: new Date()
       };
       
-      const result = await db.collection('sync_jobs').findOneAndUpdate(
+      const result = await db.collection('thiruxdb_sync_jobs').findOneAndUpdate(
         { endpoint_id: endpointIdStr },
         { $set: updatePayload },
         { returnDocument: 'after' }
@@ -57,7 +57,7 @@ async function runSyncJob(endpointIdStr, skipOffset) {
   let recordsFetched = 0, recordsCreated = 0, recordsUpdated = 0;
 
   try {
-    const endpoint = await db.collection('api_endpoints').findOne({ _id: endpointId });
+    const endpoint = await db.collection('thiruxdb_api_endpoints').findOne({ _id: endpointId });
     if (!endpoint) throw new Error('Endpoint not found');
 
     const headers = { 'Content-Type': 'application/json' };
@@ -92,7 +92,7 @@ async function runSyncJob(endpointIdStr, skipOffset) {
     }
 
     const mappings = endpoint.field_mappings || [];
-    const targetCol = endpoint.collection_name || 'data_records';
+    const targetCol = endpoint.collection_name || 'thiruxdb_data_records';
 
     const isMultiUrl = urls.length > 1;
     if (isMultiUrl) {
@@ -301,7 +301,7 @@ async function runSyncJob(endpointIdStr, skipOffset) {
 
   try {
     const db = require('../db.js').getDb();
-    await db.collection('api_endpoints').updateOne(
+    await db.collection('thiruxdb_api_endpoints').updateOne(
       { _id: endpointId },
       { $set: { last_fetched_at: new Date(), last_error: errorMessage } }
     );
@@ -313,7 +313,7 @@ async function runSyncJob(endpointIdStr, skipOffset) {
   setTimeout(async () => {
     try {
       const db = require('../db.js').getDb();
-      await db.collection('sync_jobs').deleteOne({ endpoint_id: endpointIdStr });
+      await db.collection('thiruxdb_sync_jobs').deleteOne({ endpoint_id: endpointIdStr });
     } catch(e) {}
   }, 10000);
 }
@@ -324,12 +324,12 @@ router.post('/:id/sync', async (req, res) => {
 
   try {
     const db = require('../db.js').getDb();
-    const existing = await db.collection('sync_jobs').findOne({ endpoint_id: endpointId });
+    const existing = await db.collection('thiruxdb_sync_jobs').findOne({ endpoint_id: endpointId });
     if (existing && existing.status !== 'completed' && existing.status !== 'error') {
       return res.status(400).json({ error: 'Sync already in progress' });
     }
 
-    await db.collection('sync_jobs').updateOne(
+    await db.collection('thiruxdb_sync_jobs').updateOne(
       { endpoint_id: endpointId },
       {
         $set: {
@@ -359,7 +359,7 @@ router.post('/:id/sync', async (req, res) => {
 router.get('/active-syncs', async (req, res) => {
   try {
     const db = require('../db.js').getDb();
-    const activeJobs = await db.collection('sync_jobs').find({
+    const activeJobs = await db.collection('thiruxdb_sync_jobs').find({
       status: { $in: ['running', 'downloading'] },
       cancelled: { $ne: true }
     }).toArray();
@@ -374,7 +374,7 @@ router.get('/active-syncs', async (req, res) => {
 router.get('/:id/sync-status', async (req, res) => {
   try {
     const db = require('../db.js').getDb();
-    const job = await db.collection('sync_jobs').findOne({ endpoint_id: req.params.id });
+    const job = await db.collection('thiruxdb_sync_jobs').findOne({ endpoint_id: req.params.id });
     if (!job) return res.json({ status: 'idle', current: 0, total: 0 });
     res.json(job);
   } catch(e) {
@@ -385,7 +385,7 @@ router.get('/:id/sync-status', async (req, res) => {
 router.post('/:id/cancel-sync', async (req, res) => {
   try {
     const db = require('../db.js').getDb();
-    const result = await db.collection('sync_jobs').findOneAndUpdate(
+    const result = await db.collection('thiruxdb_sync_jobs').findOneAndUpdate(
       { endpoint_id: req.params.id },
       { $set: { cancelled: true, updated_at: new Date() } },
       { returnDocument: 'after' }
@@ -403,15 +403,15 @@ router.post('/:id/cancel-sync', async (req, res) => {
 router.post('/sync-stats', async (req, res) => {
   try {
     const db = require('../db.js').getDb();
-    const endpoints = await db.collection('api_endpoints').find({}).toArray();
+    const endpoints = await db.collection('thiruxdb_api_endpoints').find({}).toArray();
     for (const ep of endpoints) {
       let count = 0;
       if (ep.collection_name) {
         count = await db.collection(ep.collection_name).countDocuments({});
       } else {
-        count = await db.collection('data_records').countDocuments({ endpoint_id: ep._id.toString() });
+        count = await db.collection('thiruxdb_data_records').countDocuments({ endpoint_id: ep._id.toString() });
       }
-      await db.collection('api_endpoints').updateOne({ _id: ep._id }, { $set: { record_count: count } });
+      await db.collection('thiruxdb_api_endpoints').updateOne({ _id: ep._id }, { $set: { record_count: count } });
     }
     res.json({ success: true, message: 'Stats synced successfully' });
   } catch (err) {
