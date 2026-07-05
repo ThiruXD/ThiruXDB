@@ -154,6 +154,11 @@ export function UsersPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">System Security</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage users, roles, and view activity logs</p>
         </div>
+        {activeTab === 'users' && (
+          <button onClick={() => openForm()} className="flex items-center justify-center sm:justify-start gap-2 bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition shadow-sm shadow-gray-900/10 dark:shadow-white/10 shrink-0 w-full sm:w-auto">
+            <UserPlus className="w-4 h-4" /> Add User
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
@@ -178,14 +183,7 @@ export function UsersPage() {
 
       {/* Users Tab */}
       {activeTab === 'users' && (
-        <div className="space-y-4">
-          <div className="flex justify-end">
-            <button onClick={() => openForm()} className="flex items-center gap-2 bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition shadow-sm shadow-gray-900/10 dark:shadow-white/10">
-              <UserPlus className="w-4 h-4" /> Add User
-            </button>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="space-y-4 pt-4">          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             {isLoadingUsers ? (
               <div className="animate-pulse">
                 <div className="h-12 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"></div>
@@ -387,10 +385,10 @@ export function UsersPage() {
                 <div className="text-red-500 text-sm">{ipModal.error}</div>
               ) : ipModal.data ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div><span className="text-gray-500 block">Location</span><span className="text-gray-900 dark:text-white font-medium">{ipModal.data.city}, {ipModal.data.country_name}</span></div>
-                    <div><span className="text-gray-500 block">ISP</span><span className="text-gray-900 dark:text-white font-medium">{ipModal.data.org}</span></div>
-                    <div><span className="text-gray-500 block">Organization</span><span className="text-gray-900 dark:text-white font-medium">{ipModal.data.org || '-'}</span></div>
+                    <div className="min-w-0"><span className="text-gray-500 block">ISP</span><span className="text-gray-900 dark:text-white font-medium block truncate" title={ipModal.data.org}>{ipModal.data.org}</span></div>
+                    <div className="min-w-0"><span className="text-gray-500 block">Organization</span><span className="text-gray-900 dark:text-white font-medium block truncate" title={ipModal.data.org || '-'}>{ipModal.data.org || '-'}</span></div>
                     <div><span className="text-gray-500 block">Timezone</span><span className="text-gray-900 dark:text-white font-medium">{ipModal.data.timezone}</span></div>
                   </div>
                   <div className="relative mt-4">
