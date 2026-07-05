@@ -1,197 +1,13 @@
-import { Router } from 'express';
-import { ObjectId } from 'mongodb';
-import { getDb } from '../db.js';
+const fs = require('fs');
+let code = fs.readFileSync('server/routes/endpoints.js', 'utf8');
 
-const router = Router();
-const COL = 'api_endpoints';
+// 1. Remove activeSyncJobs = new Map()
+code = code.replace('const activeSyncJobs = new Map();\n', '');
 
+// 2. Rewrite sync routes
+const syncRoutesRegex = /\/\/ --- BACKGROUND SYNC ENGINE ---[\s\S]*/;
 
-// GET /api/endpoints — list all, newest first
-router.get('/', async (req, res) => {
-  try {
-    const db = getDb();
-    const docs = await db.collection(COL)
-      .find({})
-      .sort({ created_at: -1 })
-      .toArray();
-    res.json(docs.map(toClient));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST /api/endpoints — create
-router.post('/', async (req, res) => {
-  try {
-    const db = getDb();
-    const now = new Date();
-    const doc = {
-      name: req.body.name,
-      description: req.body.description || null,
-      collection_name: req.body.collection_name || null,
-      id_field: req.body.id_field || null,
-      base_url: req.body.base_url,
-      auth_type: req.body.auth_type || 'none',
-      auth_config: req.body.auth_config || {},
-      field_mappings: req.body.field_mappings || [],
-      response_path: req.body.response_path || '',
-      pagination_config: req.body.pagination_config || {},
-      path_variables: Array.isArray(req.body.path_variables) ? req.body.path_variables : [],
-      is_active: req.body.is_active !== undefined ? req.body.is_active : true,
-      record_count: 0,
-      last_fetched_at: null,
-      last_error: null,
-      created_at: now,
-      updated_at: now,
-    };
-    const result = await db.collection(COL).insertOne(doc);
-    res.status(201).json(toClient({ ...doc, _id: result.insertedId }));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST /api/endpoints/test — test connection
-router.post('/test', async (req, res) => {
-  try {
-    const { base_url, auth_type, auth_config } = req.body;
-    const headers = { 'Content-Type': 'application/json' };
-    
-    if (auth_type === 'bearer' && auth_config?.token) {
-      headers['Authorization'] = `Bearer ${auth_config.token}`;
-    } else if (auth_type === 'api_key' && auth_config?.headers) {
-      Object.assign(headers, auth_config.headers);
-    } else if (auth_type === 'basic' && auth_config?.username && auth_config?.password) {
-      const b64 = Buffer.from(`${auth_config.username}:${auth_config.password}`).toString('base64');
-      headers['Authorization'] = `Basic ${b64}`;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
-    const response = await fetch(base_url, { 
-      headers, 
-      signal: controller.signal 
-    });
-    
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      return res.status(400).json({ error: `HTTP ${response.status}: ${response.statusText}` });
-    }
-    
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-
-// PUT /api/endpoints/:id — update
-router.put('/:id', async (req, res) => {
-  try {
-    const db = getDb();
-    const _id = new ObjectId(req.params.id);
-    const update = {
-      $set: {
-        name: req.body.name,
-        description: req.body.description || null,
-        collection_name: req.body.collection_name || null,
-        id_field: req.body.id_field || null,
-        base_url: req.body.base_url,
-        auth_type: req.body.auth_type,
-        auth_config: req.body.auth_config || {},
-        field_mappings: req.body.field_mappings || [],
-        response_path: req.body.response_path || '',
-        pagination_type: req.body.pagination_type,
-        pagination_config: req.body.pagination_config || {},
-        path_variables: Array.isArray(req.body.path_variables) ? req.body.path_variables : [],
-        is_active: req.body.is_active,
-        updated_at: new Date(),
-      },
-    };
-    const result = await db.collection(COL).findOneAndUpdate(
-      { _id },
-      update,
-      { returnDocument: 'after' }
-    );
-    if (!result) return res.status(404).json({ error: 'Not found' });
-    res.json(toClient(result));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// PATCH /api/endpoints/:id/toggle — toggle is_active
-router.patch('/:id/toggle', async (req, res) => {
-  try {
-    const db = getDb();
-    const _id = new ObjectId(req.params.id);
-    const doc = await db.collection(COL).findOne({ _id });
-    if (!doc) return res.status(404).json({ error: 'Not found' });
-
-    const result = await db.collection(COL).findOneAndUpdate(
-      { _id },
-      { $set: { is_active: !doc.is_active, updated_at: new Date() } },
-      { returnDocument: 'after' }
-    );
-    res.json(toClient(result));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// PATCH /api/endpoints/:id/status — update last_fetched_at / last_error
-router.patch('/:id/status', async (req, res) => {
-  try {
-    const db = getDb();
-    const _id = new ObjectId(req.params.id);
-    const $set = { updated_at: new Date() };
-    if (req.body.last_fetched_at !== undefined) $set.last_fetched_at = req.body.last_fetched_at ? new Date(req.body.last_fetched_at) : null;
-    if (req.body.last_error !== undefined) $set.last_error = req.body.last_error;
-
-    const result = await db.collection(COL).findOneAndUpdate(
-      { _id },
-      { $set },
-      { returnDocument: 'after' }
-    );
-    if (!result) return res.status(404).json({ error: 'Not found' });
-    res.json(toClient(result));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// DELETE /api/endpoints/:id — delete endpoint + cascade records + logs
-router.delete('/:id', async (req, res) => {
-  try {
-    const db = getDb();
-    const _id = new ObjectId(req.params.id);
-    await db.collection(COL).deleteOne({ _id });
-    await db.collection('data_records').deleteMany({ endpoint_id: _id });
-    await db.collection('fetch_logs').deleteMany({ endpoint_id: _id });
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST /api/endpoints/bulk-delete — delete multiple endpoints + cascade records + logs
-router.post('/bulk-delete', async (req, res) => {
-  try {
-    const db = getDb();
-    const ids = req.body.ids.map(id => new ObjectId(id));
-    await db.collection(COL).deleteMany({ _id: { $in: ids } });
-    await db.collection('data_records').deleteMany({ endpoint_id: { $in: ids } });
-    await db.collection('fetch_logs').deleteMany({ endpoint_id: { $in: ids } });
-    res.json({ success: true, deletedCount: ids.length });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- BACKGROUND SYNC ENGINE ---
+const newCode = `// --- BACKGROUND SYNC ENGINE ---
 
 async function runSyncJob(endpointIdStr, skipOffset) {
   const db = require('../db.js').getDb();
@@ -247,13 +63,13 @@ async function runSyncJob(endpointIdStr, skipOffset) {
     const headers = { 'Content-Type': 'application/json' };
     const authConfig = endpoint.auth_config || {};
     if (endpoint.auth_type === 'bearer' && authConfig.token) {
-      headers['Authorization'] = `Bearer ${authConfig.token}`;
+      headers['Authorization'] = \`Bearer \${authConfig.token}\`;
     } else if (endpoint.auth_type === 'api_key') {
       const ha = authConfig.headers;
       if (ha) Object.assign(headers, ha);
     } else if (endpoint.auth_type === 'basic') {
       const { username, password } = authConfig;
-      if (username && password) headers['Authorization'] = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+      if (username && password) headers['Authorization'] = \`Basic \${Buffer.from(\`\${username}:\${password}\`).toString('base64')}\`;
     }
 
     let urls = [endpoint.base_url];
@@ -305,7 +121,7 @@ async function runSyncJob(endpointIdStr, skipOffset) {
 
         const response = await fetch(url, { headers });
         if (!response.ok) {
-           console.error(`Failed to fetch ${url}: HTTP ${response.status}`);
+           console.error(\`Failed to fetch \${url}: HTTP \${response.status}\`);
            urlIndex++;
            if (isMultiUrl) jobState.current = urlIndex;
            jobState.status = 'running';
@@ -357,7 +173,7 @@ async function runSyncJob(endpointIdStr, skipOffset) {
            await flushState(true);
         }
       } catch (err) {
-        console.error(`Error fetching ${url}: ${err.message}`);
+        console.error(\`Error fetching \${url}: \${err.message}\`);
         urlIndex++;
         if (isMultiUrl) jobState.current = urlIndex;
         await flushState(true);
@@ -466,7 +282,7 @@ async function runSyncJob(endpointIdStr, skipOffset) {
 
   try {
     const db = require('../db.js').getDb();
-    await fetch(`http://localhost:${process.env.PORT || 3001}/api/logs`, {
+    await fetch(\`http://localhost:\${process.env.PORT || 3001}/api/logs\`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -617,3 +433,8 @@ function toClient(doc) {
 }
 
 export default router;
+`;
+code = code.replace(syncRoutesRegex, newCode);
+
+fs.writeFileSync('server/routes/endpoints.js', code);
+console.log('Successfully updated endpoints.js');
