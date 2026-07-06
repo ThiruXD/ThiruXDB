@@ -152,7 +152,7 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
     if (isMultiUrl) {
       jobState.status = 'running';
       flushState(true);
-      const CONCURRENCY = 5;
+      const CONCURRENCY = 15;
 
       for (let i = 0; i < urls.length; i += CONCURRENCY) {
         if (jobState.cancelled) {
