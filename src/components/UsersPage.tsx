@@ -219,8 +219,8 @@ export function UsersPage() {
                       <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{u.username}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-md text-xs font-medium uppercase ${u.role === 'admin' ? 'bg-purple-500/10 text-purple-400' :
-                            u.role === 'editor' ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300' :
-                              'bg-slate-500/10 text-gray-500 dark:text-gray-400'
+                          u.role === 'editor' ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300' :
+                            'bg-slate-500/10 text-gray-500 dark:text-gray-400'
                           }`}>
                           {u.role}
                         </span>
@@ -233,7 +233,9 @@ export function UsersPage() {
                       </td>
                       <td className="px-6 py-4 text-right whitespace-nowrap">
                         <button onClick={() => setViewingLogsForUser(u)} className="p-2 text-gray-500 dark:text-gray-400 hover:text-green-400 transition" title="View Logs"><Activity className="w-4 h-4" /></button>
-                        <button onClick={() => openForm(u)} className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 transition" title="Edit"><Edit className="w-4 h-4" /></button>
+                        {u.username !== (import.meta.env.VITE_ADMIN_USERNAME) && (
+                          <button onClick={() => openForm(u)} className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 transition" title="Edit"><Edit className="w-4 h-4" /></button>
+                        )}
                         {u.id !== user?.id && (
                           <button onClick={() => handleDelete(u.id)} className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-400 transition" title="Delete"><Trash2 className="w-4 h-4" /></button>
                         )}
@@ -348,7 +350,7 @@ export function UsersPage() {
                   <option value="viewer">Viewer (Read Only)</option>
                 </select>
               </div>
-              
+
               {!(editingUser?.username === 'admin') && (
                 <div className="pt-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Restricted Pages</label>
@@ -366,8 +368,8 @@ export function UsersPage() {
                           checked={(formData.restricted_pages || []).includes(page.id)}
                           onChange={e => {
                             const current = formData.restricted_pages || [];
-                            const next = e.target.checked 
-                              ? [...current, page.id] 
+                            const next = e.target.checked
+                              ? [...current, page.id]
                               : current.filter(p => p !== page.id);
                             setFormData({ ...formData, restricted_pages: next });
                           }}

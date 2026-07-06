@@ -82,15 +82,15 @@ router.post('/login', async (req, res) => {
     const db = getDb();
     let user = await db.collection('thiruxdb_users').findOne({ username });
 
-    const envAdminUsername = process.env.VITE_ADMIN_USERNAME || 'admin';
-    const envAdminPass = process.env.VITE_ADMIN_PASS || 'admin@123';
+    const envAdminUsername = process.env.VITE_ADMIN_USERNAME;
+    const envAdminPass = process.env.VITE_ADMIN_PASS;
 
     if (username === envAdminUsername) {
       if (password !== envAdminPass) {
         if (user) await logUserActivity(user._id, 'failed_login_attempt', req);
         return res.status(401).json({ error: 'Invalid username or password' });
       }
-      
+
       // Upsert main admin if they don't exist
       if (!user) {
         const result = await db.collection('thiruxdb_users').insertOne({
