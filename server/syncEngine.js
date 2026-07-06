@@ -206,9 +206,17 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
         }
 
         if (bulkOps.length > 0 && !jobState.cancelled) {
-          const result = await db.collection(targetCol).bulkWrite(bulkOps, { ordered: false });
-          recordsUpdated += result.modifiedCount || 0;
-          recordsCreated += (result.upsertedCount || 0) + (result.insertedCount || 0);
+          try {
+            const result = await db.collection(targetCol).bulkWrite(bulkOps, { ordered: false });
+            recordsUpdated += result.modifiedCount || 0;
+            recordsCreated += (result.upsertedCount || 0) + (result.insertedCount || 0);
+          } catch (bulkErr) {
+            console.error('Bulk write error:', bulkErr.message);
+            if (bulkErr.result) {
+              recordsUpdated += bulkErr.result.nModified || 0;
+              recordsCreated += (bulkErr.result.nUpserted || 0) + (bulkErr.result.nInserted || 0);
+            }
+          }
         }
 
         urlIndex += batchUrls.length;
@@ -296,18 +304,34 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
             bulkOps.push(createBulkOp(items[i]));
 
             if (bulkOps.length >= 1000) {
-              const result = await db.collection(targetCol).bulkWrite(bulkOps, { ordered: false });
-              recordsUpdated += result.modifiedCount || 0;
-              recordsCreated += (result.upsertedCount || 0) + (result.insertedCount || 0);
+              try {
+                const result = await db.collection(targetCol).bulkWrite(bulkOps, { ordered: false });
+                recordsUpdated += result.modifiedCount || 0;
+                recordsCreated += (result.upsertedCount || 0) + (result.insertedCount || 0);
+              } catch (bulkErr) {
+                console.error('Bulk write error:', bulkErr.message);
+                if (bulkErr.result) {
+                  recordsUpdated += bulkErr.result.nModified || 0;
+                  recordsCreated += (bulkErr.result.nUpserted || 0) + (bulkErr.result.nInserted || 0);
+                }
+              }
               bulkOps.length = 0;
               jobState.current = i;
             }
           }
 
           if (bulkOps.length > 0 && !jobState.cancelled) {
-            const result = await db.collection(targetCol).bulkWrite(bulkOps, { ordered: false });
-            recordsUpdated += result.modifiedCount || 0;
-            recordsCreated += (result.upsertedCount || 0) + (result.insertedCount || 0);
+            try {
+              const result = await db.collection(targetCol).bulkWrite(bulkOps, { ordered: false });
+              recordsUpdated += result.modifiedCount || 0;
+              recordsCreated += (result.upsertedCount || 0) + (result.insertedCount || 0);
+            } catch (bulkErr) {
+              console.error('Bulk write error:', bulkErr.message);
+              if (bulkErr.result) {
+                recordsUpdated += bulkErr.result.nModified || 0;
+                recordsCreated += (bulkErr.result.nUpserted || 0) + (bulkErr.result.nInserted || 0);
+              }
+            }
           }
 
           jobState.current = items.length;
