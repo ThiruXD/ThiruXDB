@@ -85,6 +85,10 @@ export async function runSyncJob(endpointIdStr, skipOffset) {
         const values = Array.from(new Set([...v1, ...v2, ...v3]));
         const newUrls = [];
         for (const url of urls) {
+          if (!url.includes(pv.variable)) {
+            newUrls.push(url);
+            continue;
+          }
           for (const val of values) {
             if (val !== undefined && val !== null) {
               newUrls.push(url.replace(pv.variable, encodeURIComponent(String(val))));
