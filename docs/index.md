@@ -1,31 +1,38 @@
-# Getting Started
+---
+pageType: home
 
-ThiruXDB is a powerful, self-hosted API data aggregation hub. It allows you to consume data from any REST API, structure it into MongoDB, and serve it blazingly fast through a public gateway.
+hero:
+  name: ThiruXDB
+  text: API Data Aggregation Hub
+  tagline: A self-hosted gateway to consume data from any REST API, structure it into MongoDB, and serve it blazingly fast through a public gateway without hitting rate limits.
+  actions:
+    - theme: brand
+      text: Get Started
+      link: /getting-started
+    - theme: alt
+      text: Live Demo
+      link: /login
+  image:
+    src: /vite.svg
+    alt: ThiruXDB
 
-## What does it solve?
-
-Modern applications frequently rely on third-party APIs (e.g., weather data, stock prices, anime databases, ecommerce product catalogs). However, fetching directly from these APIs in production introduces significant issues:
-
-- **Strict Rate Limits:** You might be limited to 60 requests per minute.
-- **High Latency:** Waiting for the 3rd party API delays your own app's response.
-- **No Querying:** Many APIs don't offer advanced filtering, sorting, or pagination.
-
-**ThiruXDB solves this.** You configure the endpoint in ThiruXDB. ThiruXDB runs a sync job to pull the data into your own MongoDB. You then serve this data to your users instantly, with built-in querying, and without ever hitting the 3rd party API limits.
-
-## Quick Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/ThiruXD/ThiruXDB.git
-cd ThiruXDB
-
-# Install dependencies using Bun
-bun install
-
-# Setup Environment Variables
-cp .env.example .env
-# Edit .env with your MongoDB URI
-
-# Start the development server
-bun run dev
-```
+features:
+  - title: Ultra Fast Delivery
+    details: Query your own database instead of waiting for slow third-party APIs. Deliver data to your users with zero latency.
+    icon: ⚡️
+  - title: Built-in Sync Engine
+    details: Schedule background jobs to automatically fetch, transform, and insert external JSON data directly into your collections.
+    icon: 🔄
+  - title: Avoid Rate Limits
+    details: By caching the data locally, you never have to worry about hitting 429 Too Many Requests on external services.
+    icon: 🛡️
+  - title: Secure Gateway
+    details: Expose your MongoDB collections via a read-only, paginated, and filterable REST API secured with API Keys.
+    icon: 🔑
+  - title: Visual Data Browser
+    details: Inspect, edit, and filter your stored documents directly from the admin dashboard with a beautiful Frappe-inspired UI.
+    icon: 📊
+  - title: Developer Friendly
+    details: Completely open-source, built on Bun and Vite, making local deployment and customization a breeze.
+    icon: 💻
+---

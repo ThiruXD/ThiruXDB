@@ -3,8 +3,8 @@ import { defineConfig } from 'rspress/config';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  base: '/docs/',
   title: 'ThiruXDB',
+  globalStyles: path.join(__dirname, 'docs/styles.css'),
   description: 'A self-hosted API data aggregation dashboard',
   themeConfig: {
     socialLinks: [

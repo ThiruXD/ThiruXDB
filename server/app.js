@@ -93,19 +93,25 @@ if (!process.env.NETLIFY) {
   }
   
   const docsPath = path.join(dir, '../doc_build');
-  app.use('/docs', express.static(docsPath));
-
   const distPath = path.join(dir, '../dist');
+
+  // Serve static files from Rspress (Landing & Docs)
+  app.use(express.static(docsPath));
+  
+  // Serve static files from Vite App
   app.use(express.static(distPath));
 
-  // Fallback
+  // Fallback routing
   app.get('*', (req, res) => {
-    if (req.path.startsWith('/docs')) {
-      return res.sendFile(path.join(docsPath, '404.html'), (err) => {
-        if (err) res.sendFile(path.join(docsPath, 'index.html'));
-      });
+    const reactRoutes = ['/dashboard', '/login'];
+    if (reactRoutes.some(r => req.path.startsWith(r))) {
+      return res.sendFile(path.join(distPath, 'index.html'));
     }
-    res.sendFile(path.join(distPath, 'index.html'));
+    
+    // Default fallback to Rspress 404
+    res.sendFile(path.join(docsPath, '404.html'), (err) => {
+      if (err) res.sendFile(path.join(distPath, 'index.html'));
+    });
   });
 }
 
