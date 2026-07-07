@@ -28,9 +28,12 @@ const handler = serverless(app, {
       context.callbackWaitsForEmptyEventLoop = false;
     } catch (err) {
       console.error('Fatal Initialization Error:', err);
-      // We can't easily return a custom response here because serverless-http takes over, 
-      // but throwing a clear error will at least show up in Netlify logs.
-      throw err; 
+      // If DB fails to connect, return a proper JSON response instead of crashing the Lambda
+      return {
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: `Database Connection Failed: ${err.message}` })
+      };
     }
   }
 });

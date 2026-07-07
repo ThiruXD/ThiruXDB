@@ -101,4 +101,10 @@ if (!process.env.NETLIFY) {
   });
 }
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled API Error:', err);
+  res.status(500).json({ error: err.message || 'Internal Server Error', stack: process.env.NODE_ENV === 'development' ? err.stack : undefined });
+});
+
 export default app;
