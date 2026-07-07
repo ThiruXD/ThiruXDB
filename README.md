@@ -103,6 +103,7 @@ To run infinite background syncs, you must deploy to a **Persistent Server** tha
 1. **[Render.com](https://render.com/) (Web Service)**
    - **Build Command:** `bun install && bun run build` (or `npm install && npm run build`)
    - **Start Command:** `bun run start` (or `npm run start`)
+   - *Note: ThiruXDB includes a built-in Anti-Sleep mechanism specifically designed for Render's Free Tier! It will automatically self-ping every 14 minutes to prevent your backend from sleeping during long background syncs.*
 2. **[Railway.app](https://railway.app/)**
    - Automatically detects `package.json` and runs the `start` script flawlessly.
 3. **VPS / Docker (DigitalOcean, Hetzner, AWS EC2)**
