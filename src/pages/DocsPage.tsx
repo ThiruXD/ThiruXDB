@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Link, Routes, Route, useLocation } from 'react-router-dom';
-import { Database, Search, ChevronRight, Menu, X, Github, BookOpen, Key, Terminal, Shield } from 'lucide-react';
+import { Database, Search, ChevronRight, Menu, X, Github, BookOpen, Key, Terminal, Shield, Moon, Sun, Code, Cpu, LayoutTemplate } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const DOCS_PAGES = [
   { id: 'getting-started', title: 'Getting Started', icon: BookOpen },
+  { id: 'architecture', title: 'Architecture & Stack', icon: Cpu },
   { id: 'api-gateway', title: 'API Gateway', icon: Key },
   { id: 'sync-engine', title: 'Sync Engine', icon: Terminal },
   { id: 'security', title: 'Security', icon: Shield },
+  { id: 'development', title: 'Development & Contributing', icon: Code },
 ];
 
 export function DocsPage() {
@@ -18,20 +20,20 @@ export function DocsPage() {
   const currentPath = location.pathname.split('/').pop() || 'getting-started';
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans selection:bg-indigo-500/30 flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans selection:bg-gray-200 dark:selection:bg-gray-800 flex flex-col">
       {/* Navbar */}
-      <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
         <div className="flex h-14 items-center px-4 md:px-6">
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden mr-4 text-gray-600 dark:text-gray-400">
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <div className="flex items-center gap-2 mr-6">
+          <Link to="/" className="flex items-center gap-2 mr-6 hover:opacity-80 transition-opacity">
             <div className="w-6 h-6 bg-gray-900 dark:bg-white rounded flex items-center justify-center shadow-sm">
               <Database className="w-3 h-3 text-white dark:text-gray-900" />
             </div>
             <span className="font-bold text-gray-900 dark:text-white">ThiruXDB</span>
             <span className="text-xs px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium ml-2 hidden sm:block">Docs</span>
-          </div>
+          </Link>
           
           <div className="flex-1 flex items-center justify-between">
             <div className="w-full max-w-md hidden md:flex items-center relative">
@@ -44,7 +46,14 @@ export function DocsPage() {
             </div>
             <div className="flex items-center gap-4 ml-auto">
               <Link to="/dashboard" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition hidden sm:block">Dashboard</Link>
-              <a href="https://github.com/ThiruXD" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">
+              <button
+                onClick={() => toggleTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition"
+                title="Toggle Theme"
+              >
+                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">
                 <Github className="w-5 h-5" />
               </a>
             </div>
@@ -52,11 +61,11 @@ export function DocsPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex items-start w-full max-w-8xl mx-auto px-4 md:px-6">
+      <div className="flex-1 flex items-start w-full max-w-8xl mx-auto px-4 md:px-6 relative">
         {/* Sidebar */}
-        <aside className={`fixed inset-y-0 left-0 z-40 w-64 pt-14 transform ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-200 ease-in-out border-r border-gray-200 dark:border-white/10 bg-white dark:bg-zinc-950 md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] overflow-y-auto`}>
+        <aside className={`fixed inset-y-0 left-0 z-40 w-64 pt-14 transform ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-200 ease-in-out border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-950 md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] overflow-y-auto`}>
           <div className="p-4 space-y-1">
-            <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-2 px-2">Overview</h4>
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-2 px-2 mt-4">Overview</h4>
             {DOCS_PAGES.map(page => {
               const isActive = currentPath === page.id || (currentPath === 'docs' && page.id === 'getting-started');
               return (
@@ -83,9 +92,11 @@ export function DocsPage() {
           <Routes>
             <Route path="/" element={<GettingStartedContent />} />
             <Route path="/getting-started" element={<GettingStartedContent />} />
+            <Route path="/architecture" element={<ArchitectureContent />} />
             <Route path="/api-gateway" element={<ApiGatewayContent />} />
             <Route path="/sync-engine" element={<SyncEngineContent />} />
             <Route path="/security" element={<SecurityContent />} />
+            <Route path="/development" element={<DevelopmentContent />} />
           </Routes>
         </main>
       </div>
@@ -103,21 +114,14 @@ function GettingStartedContent() {
         ThiruXDB is a powerful, self-hosted API data aggregation hub. It allows you to consume data from any REST API, structure it into MongoDB, and serve it blazingly fast through a public gateway.
       </p>
 
-      <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-10 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Core Concepts</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
-        <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-5 bg-white dark:bg-zinc-900 shadow-sm">
-          <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <SettingsIcon className="w-4 h-4 text-slate-700 dark:text-slate-300" /> Endpoints
-          </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Configure external APIs with custom headers, authentication, and field mappings.</p>
-        </div>
-        <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-5 bg-white dark:bg-zinc-900 shadow-sm">
-          <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <RefreshIcon className="w-4 h-4 text-slate-700 dark:text-slate-300" /> Sync Engine
-          </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400">Run manual or automated fetches to pull data from your endpoints and upsert into MongoDB.</p>
-        </div>
-      </div>
+      <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-10 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">What does it solve?</h2>
+      <p>Modern applications frequently rely on third-party APIs (e.g., weather data, stock prices, anime databases, ecommerce product catalogs). However, fetching directly from these APIs in production introduces significant issues:</p>
+      <ul>
+        <li><strong>Strict Rate Limits:</strong> You might be limited to 60 requests per minute.</li>
+        <li><strong>High Latency:</strong> Waiting for the 3rd party API delays your own app's response.</li>
+        <li><strong>No Querying:</strong> Many APIs don't offer advanced filtering, sorting, or pagination.</li>
+      </ul>
+      <p><strong>ThiruXDB solves this.</strong> You configure the endpoint in ThiruXDB. ThiruXDB runs a sync job to pull the data into your own MongoDB. You then serve this data to your users instantly, with built-in querying, and without ever hitting the 3rd party API limits.</p>
 
       <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-10 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Quick Setup</h2>
       <pre className="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-50 p-4 rounded-lg overflow-x-auto text-sm my-4 border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -129,6 +133,10 @@ function GettingStartedContent() {
           # Install dependencies using Bun{'\n'}
           bun install{'\n'}
           {'\n'}
+          # Setup Environment Variables{'\n'}
+          cp .env.example .env{'\n'}
+          # Edit .env with your MongoDB URI{'\n'}
+          {'\n'}
           # Start the development server{'\n'}
           bun run dev
         </code>
@@ -136,10 +144,50 @@ function GettingStartedContent() {
 
       <div className="mt-12 flex justify-between items-center pt-6 border-t border-slate-200 dark:border-slate-800">
         <div />
-        <Link to="/docs/api-gateway" className="flex items-center gap-2 text-slate-900 dark:text-white hover:text-slate-600 dark:hover:text-slate-300 font-medium border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-md transition-colors shadow-sm bg-white dark:bg-slate-900">
-          Next: API Gateway <ChevronRight className="w-4 h-4" />
+        <Link to="/docs/architecture" className="flex items-center gap-2 text-slate-900 dark:text-white hover:text-slate-600 dark:hover:text-slate-300 font-medium border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-md transition-colors shadow-sm bg-white dark:bg-slate-900">
+          Next: Architecture & Stack <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
+    </article>
+  );
+}
+
+function ArchitectureContent() {
+  return (
+    <article className="prose prose-slate dark:prose-invert max-w-3xl">
+      <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">Architecture & Stack</h1>
+      <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
+        Understanding how ThiruXDB is built end-to-end to ensure high performance and maintainability.
+      </p>
+
+      <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Technology Stack</h2>
+      <ul className="list-disc pl-5">
+        <li><strong>Frontend:</strong> React 18, TypeScript, Vite.</li>
+        <li><strong>Styling:</strong> Tailwind CSS (Frappe UI design principles), Lucide Icons.</li>
+        <li><strong>Backend:</strong> Node.js, Express.js.</li>
+        <li><strong>Database:</strong> MongoDB (native Node driver for maximum performance).</li>
+        <li><strong>Security:</strong> `jose` (Web Crypto JWTs), `bcryptjs` (Hashing), `express-rate-limit`.</li>
+        <li><strong>Package Manager & Runtime:</strong> Bun (for ultra-fast local development and package resolution).</li>
+      </ul>
+
+      <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Monolithic Architecture</h2>
+      <p>ThiruXDB operates as a seamless monolith to simplify deployment across serverless platforms like Netlify and Render.</p>
+      
+      <div className="my-6 border border-slate-200 dark:border-slate-800 rounded-lg p-6 bg-slate-50 dark:bg-slate-900 text-sm overflow-x-auto font-mono text-slate-800 dark:text-slate-300">
+        <pre className="m-0">
+          ├── /src                # React Frontend (Dashboard, Docs, Landing){'\n'}
+          │   ├── /components     # UI components (Frappe aesthetic){'\n'}
+          │   ├── /pages          # Top level public routing pages{'\n'}
+          │   └── /context        # Global state (Theme, Auth){'\n'}
+          ├── /server             # Express Backend API{'\n'}
+          │   ├── /routes         # API endpoints (auth, endpoints, fetch, gateway){'\n'}
+          │   ├── app.js          # Core Express application{'\n'}
+          │   └── index.js        # Serverless / Local entry point{'\n'}
+          └── netlify.toml        # Serverless function configuration{'\n'}
+        </pre>
+      </div>
+
+      <p>During a build, Vite compiles the `/src` React app into static assets in `/dist`. The Express backend serves these static files on the root `/` route, while all `/api/*` routes are handled by the backend logic. This ensures that the application can be hosted entirely on a single domain without CORS issues.</p>
     </article>
   );
 }
@@ -185,9 +233,16 @@ function SyncEngineContent() {
       <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
         The Sync Engine is responsible for pulling data from your endpoints and intelligently upserting it into your database.
       </p>
+      <h2 className="text-xl font-semibold text-slate-900 dark:text-white mt-8 mb-4">How it works</h2>
       <p className="text-slate-600 dark:text-slate-400">
-        When a sync is triggered, ThiruXDB executes the request to the target API, traverses the response JSON according to your mappings, and leverages MongoDB's `bulkWrite` API to insert thousands of records simultaneously.
+        When a sync is triggered:
       </p>
+      <ol className="list-decimal pl-5 space-y-2">
+        <li>The backend queries the endpoint configuration, including HTTP headers and JSON extraction paths.</li>
+        <li>An asynchronous `fetch` request is made to the external provider.</li>
+        <li>The engine parses the response array and prepares a massive MongoDB `bulkWrite` operation.</li>
+        <li>Records are `upserted` (Insert if new, Update if exists) matching on a unique identifier defined in your configuration. This prevents duplicates.</li>
+      </ol>
     </article>
   );
 }
@@ -200,10 +255,43 @@ function SecurityContent() {
         Security is a first-class citizen in ThiruXDB.
       </p>
       <ul className="list-disc pl-5 text-slate-600 dark:text-slate-400 space-y-2 mb-6">
-        <li><strong>Zero-Config JWTs:</strong> ThiruXDB uses the Node `jose` library to automatically generate, encrypt, and manage a secure JWT Secret Key using the Web Crypto API.</li>
+        <li><strong>Zero-Config JWTs:</strong> ThiruXDB uses the Node `jose` library to automatically generate, encrypt, and manage a secure JWT Secret Key using the Web Crypto API. No `.env` secrets required for JWT signing.</li>
         <li><strong>Session Hijacking Prevention:</strong> Every JWT is cryptographically bound to the user's browser `User-Agent`. If a token is stolen and used on another device, it is instantly rejected.</li>
         <li><strong>Role-Based Access Control:</strong> Native support for `admin`, `editor`, and `viewer` roles, with page-level restrictions available per user.</li>
       </ul>
+    </article>
+  );
+}
+
+function DevelopmentContent() {
+  return (
+    <article className="prose prose-slate dark:prose-invert max-w-3xl">
+      <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">Development & Contributing</h1>
+      <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
+        Whether you are a developer looking to extend ThiruXDB or just looking to understand the codebase, this guide covers the core workflow.
+      </p>
+
+      <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Local Development Workflow</h2>
+      <p>ThiruXDB uses `bun` to run both the React frontend and the Express backend simultaneously during development.</p>
+      
+      <pre className="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-50 p-4 rounded-lg overflow-x-auto text-sm my-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <code className="language-bash">
+          bun run dev
+        </code>
+      </pre>
+      <p>This command runs `bun run dev:server & bun run dev:client`. The frontend runs on `localhost:5173` and the API runs on `localhost:3000`. The Vite config automatically proxies `/api` requests to the backend.</p>
+
+      <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Modifying the Database Schema</h2>
+      <p>ThiruXDB uses the native `mongodb` driver. Because there are no rigid ORMs (like Mongoose or Prisma), modifying collections is as simple as inserting new fields. All collections use the `thiruxdb_` prefix.</p>
+      
+      <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Contributing Guidelines</h2>
+      <ol className="list-decimal pl-5 space-y-2">
+        <li><strong>Fork the repository</strong> and create your feature branch (`git checkout -b feature/AmazingFeature`).</li>
+        <li><strong>Adhere to Frappe UI design principles.</strong> Use neutral grays, subtle borders (`border-gray-200`), and minimalist elements. Avoid vibrant colors or heavy drop-shadows.</li>
+        <li><strong>Keep the bundle small.</strong> Do not install heavy dependencies unless strictly necessary.</li>
+        <li><strong>Commit your changes</strong> (`git commit -m 'Add some AmazingFeature'`).</li>
+        <li><strong>Push to the branch</strong> and open a Pull Request!</li>
+      </ol>
     </article>
   );
 }
