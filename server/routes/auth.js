@@ -17,11 +17,10 @@ const router = express.Router();
 
 // Generate a security fingerprint for the session
 export function generateFingerprint(req) {
-  const ip = requestIp.getClientIp(req) || 'unknown';
   const ua = req.headers['user-agent'] || 'unknown';
-  // We use a simple hash of IP + User-Agent. Even if token is stolen, 
-  // it can't be used from a different device/network.
-  return bcrypt.hashSync(`${ip}-${ua}`, 1); // Cost 1 is fast enough for fingerprinting
+  // We use a hash of User-Agent. Even if token is stolen, 
+  // it can't be used from a different browser profile.
+  return bcrypt.hashSync(ua, 1); // Cost 1 is fast enough for fingerprinting
 }
 
 // Helper to log user activity

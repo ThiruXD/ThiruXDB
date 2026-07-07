@@ -13,9 +13,8 @@ import bcrypt from 'bcryptjs';
 // Verify the fingerprint matches the current request
 function verifyFingerprint(req, tokenFingerprint) {
   if (!tokenFingerprint) return true; // Backwards compatibility for old tokens
-  const ip = requestIp.getClientIp(req) || 'unknown';
   const ua = req.headers['user-agent'] || 'unknown';
-  return bcrypt.compareSync(`${ip}-${ua}`, tokenFingerprint);
+  return bcrypt.compareSync(ua, tokenFingerprint);
 }
 
 export async function authenticateToken(req, res, next) {

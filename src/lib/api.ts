@@ -24,6 +24,7 @@ export interface ApiKey {
   prefix: string;
   created_at: string;
   created_by: string;
+  expires_at: string | null;
   is_active: boolean;
   last_used: string | null;
   rate_limit: { max: number, window: string };
@@ -181,9 +182,10 @@ export const api = {
   createApiKey: (
     name: string, 
     rate_limit: { max: number, window: string }, 
-    quota: { max: number, window: string }
+    quota: { max: number, window: string },
+    expires_in: string
   ): Promise<{ success: boolean, key: ApiKey, full_key: string }> => 
-    request('/apikeys', { method: 'POST', body: JSON.stringify({ name, rate_limit, quota }) }),
+    request('/apikeys', { method: 'POST', body: JSON.stringify({ name, rate_limit, quota, expires_in }) }),
   deleteApiKey: (id: string): Promise<{ success: boolean }> =>
     request(`/apikeys/${id}`, { method: 'DELETE' }),
 

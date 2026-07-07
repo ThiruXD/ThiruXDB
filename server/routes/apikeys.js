@@ -22,6 +22,7 @@ router.get('/', async (req, res) => {
       prefix: k.prefix,
       created_at: k.created_at,
       created_by: k.created_by,
+      expires_at: k.expires_at,
       is_active: k.is_active,
       last_used: k.last_used
     }));
@@ -34,7 +35,7 @@ router.get('/', async (req, res) => {
 // POST /api/apikeys - Generate a new API key
 router.post('/', async (req, res) => {
   try {
-    const { name, rate_limit, quota } = req.body;
+    const { name, rate_limit, quota, expires_in } = req.body;
     if (!name) return res.status(400).json({ error: 'Key name is required' });
 
     const db = getDb();
@@ -65,6 +66,17 @@ router.post('/', async (req, res) => {
       reset_at.setHours(0, 0, 0, 0);
     }
 
+    // Parse Expiration
+    let expires_at = null;
+    if (expires_in && expires_in !== 'never') {
+      const amount = parseInt(expires_in);
+      const unit = expires_in.replace(/[0-9]/g, '').trim();
+      expires_at = new Date(now);
+      if (unit === 'd') expires_at.setDate(expires_at.getDate() + amount);
+      if (unit === 'm') expires_at.setMonth(expires_at.getMonth() + amount);
+      if (unit === 'y') expires_at.setFullYear(expires_at.getFullYear() + amount);
+    }
+
     const newKey = {
       name,
       prefix,
@@ -77,6 +89,7 @@ router.post('/', async (req, res) => {
       },
       created_at: now,
       created_by: req.user.username,
+      expires_at,
       is_active: true,
       last_used: null
     };
@@ -91,6 +104,7 @@ router.post('/', async (req, res) => {
         name: newKey.name,
         prefix: newKey.prefix,
         created_at: newKey.created_at,
+        expires_at: newKey.expires_at,
       },
       full_key: fullKey 
     });

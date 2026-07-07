@@ -57,6 +57,10 @@ async function verifyApiKey(req, res, next) {
       return res.status(403).json({ error: 'API Key is disabled.' });
     }
 
+    if (keyDoc.expires_at && new Date() > new Date(keyDoc.expires_at)) {
+      return res.status(403).json({ error: 'API Key has expired.' });
+    }
+
     const now = Date.now();
 
     // 1. Short-term Rate Limiting (In-Memory)

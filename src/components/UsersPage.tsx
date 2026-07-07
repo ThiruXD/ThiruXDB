@@ -671,18 +671,18 @@ function SettingsPanel() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Session Timeout Duration
           </label>
-          <div className="flex gap-4 items-center">
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
             <input
               type="text"
               value={timeout}
               onChange={(e) => setTimeoutVal(e.target.value)}
-              className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-gray-900 dark:text-white"
+              className="w-full sm:flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-gray-900 dark:text-white"
               placeholder="e.g., 24h, 30m, 7d"
             />
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition shadow-sm"
+              className="w-full sm:w-auto bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition shadow-sm whitespace-nowrap"
             >
               {isSaving ? 'Saving...' : saved ? 'Saved!' : 'Save Settings'}
             </button>
@@ -711,6 +711,8 @@ function APIKeysPanel() {
   const [quotaMax, setQuotaMax] = useState(1000);
   const [quotaWindow, setQuotaWindow] = useState('day'); // 'day', 'week', 'month'
 
+  const [expiresIn, setExpiresIn] = useState('never'); // 'never', '30d', '6m', '1y'
+
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -734,7 +736,8 @@ function APIKeysPanel() {
       const res = await api.createApiKey(
         newKeyName, 
         { max: rateLimitMax, window: rateLimitWindow },
-        { max: quotaMax, window: quotaWindow }
+        { max: quotaMax, window: quotaWindow },
+        expiresIn
       );
       setGeneratedKey(res.full_key);
       setNewKeyName('');
@@ -787,7 +790,7 @@ function APIKeysPanel() {
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Generate API Keys to securely query aggregated data from external applications via <code className="bg-gray-100 dark:bg-gray-900 px-1 rounded text-xs text-indigo-500">/api/v1/public/:collection</code></p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <div>
             <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Key Name</label>
             <input
@@ -841,6 +844,21 @@ function APIKeysPanel() {
                 <option value="month">Month</option>
               </select>
             </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Expiration</label>
+            <select 
+              className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white"
+              value={expiresIn}
+              onChange={(e) => setExpiresIn(e.target.value)}
+            >
+              <option value="never">Never Expire</option>
+              <option value="7d">7 Days</option>
+              <option value="30d">30 Days</option>
+              <option value="3m">3 Months</option>
+              <option value="6m">6 Months</option>
+              <option value="1y">1 Year</option>
+            </select>
           </div>
         </div>
 
