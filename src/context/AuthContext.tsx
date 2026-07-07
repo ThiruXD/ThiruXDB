@@ -16,7 +16,7 @@ interface SessionUser {
 interface AuthContextType {
   isAuthenticated: boolean;
   user: SessionUser | null;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<{success: boolean, error?: string}>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -52,22 +52,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (username: string, password: string): Promise<{success: boolean, error?: string}> => {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        return { success: false, error: `Failed to parse response: ${res.status} ${res.statusText}` };
+      }
+
       if (res.ok) {
-        const data = await res.json();
         localStorage.setItem(TOKEN_KEY, data.token);
         setUser({ id: data.user.id, username: data.user.username, role: data.user.role, restricted_pages: data.user.restricted_pages });
-        return true;
+        return { success: true };
       }
-      return false;
-    } catch {
-      return false;
+      return { success: false, error: data?.error || 'Invalid credentials' };
+    } catch (err: any) {
+      return { success: false, error: err.message };
     }
   };
 

@@ -22,9 +22,9 @@ export function LoginPage() {
     // Simulate brief delay for UX
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const success = await login(username, password);
-    if (!success) {
-      setError('Invalid username or password');
+    const res = await login(username, password);
+    if (!res.success) {
+      setError(res.error || 'Invalid username or password');
     }
     setIsLoading(false);
   };
