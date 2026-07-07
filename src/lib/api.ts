@@ -223,6 +223,9 @@ export const api = {
   deleteUser: (id: string): Promise<{ success: boolean }> =>
     request(`/users/${id}`, { method: 'DELETE' }),
 
+  lookupIp: (ip: string): Promise<any> =>
+    request(`/users/ip-lookup/${ip}`),
+
   getActivityLogs: (params: { page?: number; limit?: number; userId?: string }): Promise<{
     logs: ActivityLog[];
     total: number;

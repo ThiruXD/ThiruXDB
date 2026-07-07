@@ -68,10 +68,7 @@ export function UsersPage() {
   const handleIpLookup = async (ip: string) => {
     setIpModal({ isOpen: true, ip, data: null, loading: true, error: null, copied: false });
     try {
-      const res = await fetch(`https://ipapi.co/${ip}/json/`);
-      if (!res.ok) throw new Error('Failed to fetch IP data');
-      const data = await res.json();
-      if (data.error) throw new Error(data.reason || 'Failed to fetch IP data');
+      const data = await api.lookupIp(ip);
       setIpModal(prev => ({ ...prev, data, loading: false }));
     } catch (err: any) {
       setIpModal(prev => ({ ...prev, error: err.message, loading: false }));

@@ -169,4 +169,33 @@ router.get('/activity', async (req, res) => {
   }
 });
 
+// GET /api/users/ip-lookup/:ip - Proxy IP lookup to avoid frontend CORS/CSP issues
+router.get('/ip-lookup/:ip', async (req, res) => {
+  try {
+    const { ip } = req.params;
+    // We use ip-api.com since it's reliable and has a free tier without strict CORS for server-to-server calls
+    const response = await fetch(`http://ip-api.com/json/${ip}`);
+    const data = await response.json();
+    
+    // Normalize format to match what the frontend expects (which was originally designed for ipapi.co)
+    if (data.status === 'success') {
+      res.json({
+        ip: data.query,
+        city: data.city,
+        region: data.regionName,
+        country_name: data.country,
+        org: data.org,
+        asn: data.as,
+        latitude: data.lat,
+        longitude: data.lon,
+        timezone: data.timezone
+      });
+    } else {
+      res.status(400).json({ error: data.message || 'Lookup failed' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
