@@ -702,6 +702,15 @@ function APIKeysPanel() {
   const [keys, setKeys] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newKeyName, setNewKeyName] = useState('');
+  
+  // Rate Limiting State
+  const [rateLimitMax, setRateLimitMax] = useState(10);
+  const [rateLimitWindow, setRateLimitWindow] = useState('s'); // 's', 'm', 'h'
+  
+  // Quota State
+  const [quotaMax, setQuotaMax] = useState(1000);
+  const [quotaWindow, setQuotaWindow] = useState('day'); // 'day', 'week', 'month'
+
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -722,7 +731,11 @@ function APIKeysPanel() {
   const handleCreate = async () => {
     if (!newKeyName.trim()) return;
     try {
-      const res = await api.createApiKey(newKeyName);
+      const res = await api.createApiKey(
+        newKeyName, 
+        { max: rateLimitMax, window: rateLimitWindow },
+        { max: quotaMax, window: quotaWindow }
+      );
       setGeneratedKey(res.full_key);
       setNewKeyName('');
       fetchKeys();
@@ -768,23 +781,74 @@ function APIKeysPanel() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+      <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6 space-y-4">
         <div>
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Public API Gateway</h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Generate API Keys to securely query aggregated data from external applications via <code className="bg-gray-100 dark:bg-gray-900 px-1 rounded text-xs text-indigo-500">/api/v1/public/:collection</code></p>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          <input
-            type="text"
-            placeholder="Key Name (e.g., Marketing Dashboard)"
-            className="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-900 dark:text-white"
-            value={newKeyName}
-            onChange={(e) => setNewKeyName(e.target.value)}
-          />
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Key Name</label>
+            <input
+              type="text"
+              placeholder="e.g., Marketing App"
+              className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white"
+              value={newKeyName}
+              onChange={(e) => setNewKeyName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Rate Limit (Short-term)</label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min="1"
+                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white"
+                value={rateLimitMax}
+                onChange={(e) => setRateLimitMax(parseInt(e.target.value) || 1)}
+              />
+              <span className="text-gray-500 self-center text-sm">per</span>
+              <select 
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-900 dark:text-white"
+                value={rateLimitWindow}
+                onChange={(e) => setRateLimitWindow(e.target.value)}
+              >
+                <option value="s">Second</option>
+                <option value="m">Minute</option>
+                <option value="h">Hour</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Quota (Long-term)</label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min="1"
+                className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white"
+                value={quotaMax}
+                onChange={(e) => setQuotaMax(parseInt(e.target.value) || 1)}
+              />
+              <span className="text-gray-500 self-center text-sm">per</span>
+              <select 
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-900 dark:text-white"
+                value={quotaWindow}
+                onChange={(e) => setQuotaWindow(e.target.value)}
+              >
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end">
           <button 
             onClick={handleCreate}
             disabled={!newKeyName.trim()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition disabled:opacity-50 whitespace-nowrap"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition disabled:opacity-50 whitespace-nowrap"
           >
             Generate Key
           </button>

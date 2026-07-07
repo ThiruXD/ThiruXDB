@@ -26,6 +26,9 @@ export interface ApiKey {
   created_by: string;
   is_active: boolean;
   last_used: string | null;
+  rate_limit: { max: number, window: string };
+  quota: { max: number, window: string };
+  usage?: { quota_used: number, reset_at: string };
 }
 
 const BASE = '/api';
@@ -175,8 +178,12 @@ export const api = {
     request('/users/settings', { method: 'POST', body: JSON.stringify(data) }),
 
   getApiKeys: (): Promise<ApiKey[]> => request('/apikeys'),
-  createApiKey: (name: string): Promise<{ success: boolean, key: ApiKey, full_key: string }> => 
-    request('/apikeys', { method: 'POST', body: JSON.stringify({ name }) }),
+  createApiKey: (
+    name: string, 
+    rate_limit: { max: number, window: string }, 
+    quota: { max: number, window: string }
+  ): Promise<{ success: boolean, key: ApiKey, full_key: string }> => 
+    request('/apikeys', { method: 'POST', body: JSON.stringify({ name, rate_limit, quota }) }),
   deleteApiKey: (id: string): Promise<{ success: boolean }> =>
     request(`/apikeys/${id}`, { method: 'DELETE' }),
 

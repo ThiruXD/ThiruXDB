@@ -5,6 +5,25 @@ import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
+// Simple in-memory token bucket for short-term rate limiting
+const rateLimitCache = new Map();
+
+// Helper to calculate quota reset dates
+function calculateNextReset(windowType) {
+  const reset_at = new Date();
+  if (windowType === 'day') {
+    reset_at.setHours(24, 0, 0, 0); // Start of tomorrow
+  } else if (windowType === 'week') {
+    const daysToNextMonday = (8 - reset_at.getDay()) % 7 || 7;
+    reset_at.setDate(reset_at.getDate() + daysToNextMonday);
+    reset_at.setHours(0, 0, 0, 0);
+  } else if (windowType === 'month') {
+    reset_at.setMonth(reset_at.getMonth() + 1, 1);
+    reset_at.setHours(0, 0, 0, 0);
+  }
+  return reset_at;
+}
+
 // Middleware to verify Public API Keys
 async function verifyApiKey(req, res, next) {
   const apiKeyHeader = req.headers['x-api-key'] || req.headers['authorization'];
@@ -38,11 +57,61 @@ async function verifyApiKey(req, res, next) {
       return res.status(403).json({ error: 'API Key is disabled.' });
     }
 
-    // Update last_used timestamp (fire and forget to avoid blocking the response)
-    db.collection('thiruxdb_api_keys').updateOne(
-      { _id: keyDoc._id },
-      { $set: { last_used: new Date() } }
-    ).catch(err => console.error('Failed to update API key last_used:', err));
+    const now = Date.now();
+
+    // 1. Short-term Rate Limiting (In-Memory)
+    if (keyDoc.rate_limit) {
+      const keyIdStr = keyDoc._id.toString();
+      let rl = rateLimitCache.get(keyIdStr);
+      
+      if (!rl || now > rl.reset_at) {
+        // Initialize or reset bucket
+        let windowMs = 1000; // 's'
+        if (keyDoc.rate_limit.window === 'm') windowMs = 60 * 1000;
+        if (keyDoc.rate_limit.window === 'h') windowMs = 60 * 60 * 1000;
+        
+        rl = { count: 0, reset_at: now + windowMs };
+      }
+
+      if (rl.count >= keyDoc.rate_limit.max) {
+        return res.status(429).json({ error: `Rate limit exceeded. Maximum ${keyDoc.rate_limit.max} requests per ${keyDoc.rate_limit.window}.` });
+      }
+
+      rl.count += 1;
+      rateLimitCache.set(keyIdStr, rl);
+    }
+
+    // 2. Long-term Quota Limiting (Database)
+    if (keyDoc.quota && keyDoc.usage) {
+      const usageResetTime = new Date(keyDoc.usage.reset_at).getTime();
+      let updateDoc = { $set: { last_used: new Date() }, $inc: { 'usage.quota_used': 1 } };
+      let quotaUsed = keyDoc.usage.quota_used;
+
+      // If the quota window has expired, reset it
+      if (now > usageResetTime) {
+        const nextReset = calculateNextReset(keyDoc.quota.window);
+        updateDoc.$set['usage.reset_at'] = nextReset;
+        updateDoc.$set['usage.quota_used'] = 1;
+        delete updateDoc.$inc;
+        quotaUsed = 0; // Reset for this request
+      }
+
+      if (quotaUsed >= keyDoc.quota.max) {
+        return res.status(429).json({ error: `Quota exceeded. Maximum ${keyDoc.quota.max} requests per ${keyDoc.quota.window}.` });
+      }
+
+      // Update usage and last_used asynchronously to avoid blocking the response
+      db.collection('thiruxdb_api_keys').updateOne(
+        { _id: keyDoc._id },
+        updateDoc
+      ).catch(err => console.error('Failed to update API key usage:', err));
+    } else {
+      // Just update last_used if no quota is configured
+      db.collection('thiruxdb_api_keys').updateOne(
+        { _id: keyDoc._id },
+        { $set: { last_used: new Date() } }
+      ).catch(err => console.error('Failed to update API key last_used:', err));
+    }
 
     // Attach to request
     req.apiKey = keyDoc;

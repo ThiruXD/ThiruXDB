@@ -34,7 +34,7 @@ Check out the live deployment of ThiruXDB here:
 - **Dynamic Session Timeout** — Admins can change the global session expiration time directly from the "System Security" panel in the UI (e.g., `30m` for 30 minutes, `12h` for 12 hours, `7d` for 7 days).
 - **Session Hijacking Prevention** — JWT tokens are cryptographically fingerprinted using a hash of the user's IP Address and Browser User-Agent. Stolen or forged session tokens will instantly be invalidated if used on a different device or network.
 - **Anti-Export & Screenshot Security** — If a user is restricted from exporting, the UI activates robust deterrence: text selection and right-clicking are disabled, Developer Tools are trapped, keyboard shortcuts (Ctrl+C, F12, Snipping Tool) are blocked, and the screen aggressively blurs to 0% opacity if the window loses focus to deter screen recording software.
-- **Public REST API Gateway** — Generate secure API keys to expose aggregated data to external applications via `/api/v1/public/:collection`. Includes dynamic filtering, pagination, and MongoDB query translation natively built-in.
+- **Public REST API Gateway** — Generate secure API keys to expose aggregated data to external applications via `/api/v1/public/:collection`. Includes dynamic filtering, pagination, MongoDB query translation, and highly granular rate limiting (per second/minute/hour) and usage quotas (per day/week/month).
 - **Activity & IP Auditing** — Comprehensive user activity logs with automatic IP Geolocation (`ip-api.com`), tracking ISPs, Cities, and Device information. All API requests to third-party IP services are strictly proxied through the Node.js backend to bypass aggressive browser CORS and CSP restrictions.
 - **Frappe UI "Espresso" Aesthetic** — Sleek, flat design layout natively built in React + Tailwind.
 - **Global Light/Dark Mode** — Fully responsive theme switching that persists in local storage.
@@ -56,7 +56,7 @@ ThiruXDB is designed to solve a very specific problem: **Consolidating scattered
 1. **No More One-Off Scripts:** Stop writing brittle `fetch()` loops in Python or Node.js every time you need to pull data from a new API. Just paste the URL into ThiruXDB, map the fields, and click fetch.
 2. **Built-in Fault Tolerance:** Writing a script to download 10,000 items is hard because networks fail. ThiruXDB automatically handles connection drops, skips malformed data, and lets you safely pause/resume massive sync operations.
 3. **Instant Admin Panel:** Getting data into a database is only half the battle. ThiruXDB instantly gives you and your team a lightning-fast, searchable frontend to actually *look* at the data you just downloaded.
-4. **Public REST API Gateway:** Turn ThiruXDB into your organization's central Data Hub. Securely distribute aggregated data to your external apps or third-party clients via API Keys and `GET /api/v1/public/...` endpoints, complete with built-in pagination and filtering.
+4. **Public REST API Gateway:** Turn ThiruXDB into your organization's central Data Hub. Securely distribute aggregated data to your external apps or third-party clients via API Keys and `GET /api/v1/public/...` endpoints, complete with built-in pagination, filtering, and API Rate Limits to prevent abuse.
 5. **Military-Grade Security:** With built-in RBAC, JWT fingerprinting, dynamic cryptographic keys, and anti-export protections, you can safely give external clients or junior employees access to view the data without worrying about them deleting it, stealing it, or hijacking sessions.
 
 ---

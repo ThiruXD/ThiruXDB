@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
 // POST /api/apikeys - Generate a new API key
 router.post('/', async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, rate_limit, quota } = req.body;
     if (!name) return res.status(400).json({ error: 'Key name is required' });
 
     const db = getDb();
@@ -50,11 +50,32 @@ router.post('/', async (req, res) => {
     // Hash the full key for storage so even DB access doesn't expose keys
     const hashedKey = crypto.createHash('sha256').update(fullKey).digest('hex');
 
+    // Initialize quota usage
+    const now = new Date();
+    // Start of current day/week/month
+    const reset_at = new Date(now);
+    if (quota.window === 'day') {
+      reset_at.setHours(24, 0, 0, 0); // Start of tomorrow
+    } else if (quota.window === 'week') {
+      const daysToNextMonday = (8 - reset_at.getDay()) % 7 || 7;
+      reset_at.setDate(reset_at.getDate() + daysToNextMonday);
+      reset_at.setHours(0, 0, 0, 0);
+    } else if (quota.window === 'month') {
+      reset_at.setMonth(reset_at.getMonth() + 1, 1);
+      reset_at.setHours(0, 0, 0, 0);
+    }
+
     const newKey = {
       name,
       prefix,
       key_hash: hashedKey, // We ONLY store the hash!
-      created_at: new Date(),
+      rate_limit,
+      quota,
+      usage: {
+        quota_used: 0,
+        reset_at
+      },
+      created_at: now,
       created_by: req.user.username,
       is_active: true,
       last_used: null
