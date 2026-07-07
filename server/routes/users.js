@@ -169,6 +169,35 @@ router.get('/activity', async (req, res) => {
   }
 });
 
+// GET /api/users/settings - Get system settings
+router.get('/settings', async (req, res) => {
+  try {
+    const db = getDb();
+    const settings = await db.collection('thiruxdb_settings').findOne({ _id: 'general' });
+    res.json(settings || { session_timeout: '24h' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/users/settings - Update system settings
+router.post('/settings', async (req, res) => {
+  try {
+    const db = getDb();
+    const { session_timeout } = req.body;
+    
+    await db.collection('thiruxdb_settings').updateOne(
+      { _id: 'general' },
+      { $set: { session_timeout: session_timeout || '24h', updated_at: new Date() } },
+      { upsert: true }
+    );
+    
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/users/ip-lookup/:ip - Proxy IP lookup to avoid frontend CORS/CSP issues
 router.get('/ip-lookup/:ip', async (req, res) => {
   try {

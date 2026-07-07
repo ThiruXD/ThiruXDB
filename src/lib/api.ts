@@ -160,6 +160,10 @@ export const api = {
   }): Promise<FetchLog> =>
     request('/logs', { method: 'POST', body: JSON.stringify(data) }),
 
+  getSettings: (): Promise<{ session_timeout: string }> => request('/users/settings'),
+  updateSettings: (data: { session_timeout: string }): Promise<{ success: boolean }> => 
+    request('/users/settings', { method: 'POST', body: JSON.stringify(data) }),
+
   deleteLog: (id: string): Promise<{ success: boolean }> =>
     request(`/logs/${id}`, { method: 'DELETE' }),
 

@@ -14,7 +14,6 @@ import { UAParser } from 'ua-parser-js';
 import { getJwtSecret } from '../jwtSecret.js';
 
 const router = express.Router();
-const JWT_EXPIRES_IN = '24h';
 
 // Generate a security fingerprint for the session
 export function generateFingerprint(req) {
@@ -127,6 +126,10 @@ router.post('/login', async (req, res) => {
 
     const fingerprint = generateFingerprint(req);
     const secret = await getJwtSecret();
+    
+    // Fetch dynamic session timeout from settings
+    const settingsDoc = await db.collection('thiruxdb_settings').findOne({ _id: 'general' });
+    const expiresIn = settingsDoc?.session_timeout || '24h';
 
     const token = await new jose.SignJWT({
       id: user._id.toString(),
@@ -136,7 +139,7 @@ router.post('/login', async (req, res) => {
       fingerprint // Embed the fingerprint into the token!
     })
       .setProtectedHeader({ alg: 'HS256' })
-      .setExpirationTime(JWT_EXPIRES_IN)
+      .setExpirationTime(expiresIn)
       .sign(secret);
 
     await logUserActivity(user._id, 'login', req);

@@ -29,7 +29,7 @@ import { syntaxHighlight } from '../lib/utils';
 
 export function UsersPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'users' | 'activity'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'activity' | 'settings'>('users');
 
   // Users State
   const [users, setUsers] = useState<User[]>([]);
@@ -181,6 +181,13 @@ export function UsersPage() {
         >
           <Activity className="w-4 h-4" /> Activity Logs
         </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium transition ${activeTab === 'settings' ? 'border-gray-900 dark:border-white text-gray-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300'
+            }`}
+        >
+          <Shield className="w-4 h-4" /> Security Settings
+        </button>
       </div>
 
       {/* Users Tab */}
@@ -246,6 +253,9 @@ export function UsersPage() {
         </div>
         </div>
       )}
+
+      {/* Settings Tab */}
+      {activeTab === 'settings' && <SettingsPanel />}
 
       {/* Activity Logs Tab */}
       {activeTab === 'activity' && (
@@ -614,6 +624,64 @@ function UserLogsModal({ user, onClose, onIpLookup }: { user: User; onClose: () 
             <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg disabled:opacity-50 hover:bg-slate-600 transition">Previous</button>
             <button disabled={page === totalPages || totalPages === 0} onClick={() => setPage(p => p + 1)} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg disabled:opacity-50 hover:bg-slate-600 transition">Next</button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsPanel() {
+  const [timeout, setTimeoutVal] = useState('24h');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.getSettings().then(data => setTimeoutVal(data.session_timeout || '24h')).catch(console.error);
+  }, []);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await api.updateSettings({ session_timeout: timeout });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save settings');
+    }
+    setIsSaving(false);
+  };
+
+  return (
+    <div className="max-w-2xl bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Security Settings</h2>
+      
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Session Timeout Duration
+          </label>
+          <div className="flex gap-4 items-center">
+            <input
+              type="text"
+              value={timeout}
+              onChange={(e) => setTimeoutVal(e.target.value)}
+              className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-gray-900 dark:text-white"
+              placeholder="e.g., 24h, 30m, 7d"
+            />
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition shadow-sm"
+            >
+              {isSaving ? 'Saving...' : saved ? 'Saved!' : 'Save Settings'}
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            Controls how long a user stays logged in before being forced to re-authenticate. <br/>
+            Valid formats: <b className="text-gray-700 dark:text-gray-300">30m</b> (30 minutes), <b className="text-gray-700 dark:text-gray-300">12h</b> (12 hours), <b className="text-gray-700 dark:text-gray-300">7d</b> (7 days). <br/>
+            Note: Changing this only applies to newly generated session tokens.
+          </p>
         </div>
       </div>
     </div>
