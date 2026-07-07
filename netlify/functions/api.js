@@ -15,13 +15,20 @@ let dbPromise = null;
 const handler = serverless(app, {
   basePath: '/.netlify/functions',
   request: async (req, event, context) => {
-    // Ensure DB connection is established before processing the route
-    if (!dbPromise) {
-      dbPromise = connectDb();
+    try {
+      // Ensure DB connection is established before processing the route
+      if (!dbPromise) {
+        dbPromise = connectDb();
+      }
+      await dbPromise;
+      // Tell Netlify to wait for the event loop to empty before freezing the container
+      context.callbackWaitsForEmptyEventLoop = false;
+    } catch (err) {
+      console.error('Fatal Initialization Error:', err);
+      // We can't easily return a custom response here because serverless-http takes over, 
+      // but throwing a clear error will at least show up in Netlify logs.
+      throw err; 
     }
-    await dbPromise;
-    // Tell Netlify to wait for the event loop to empty before freezing the container
-    context.callbackWaitsForEmptyEventLoop = false;
   }
 });
 

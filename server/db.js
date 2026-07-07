@@ -9,15 +9,14 @@ import bcrypt from 'bcryptjs';
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB || 'thiruXDB';
 
-if (!uri) {
-  throw new Error('MONGODB_URI environment variable is not set');
-}
-
 let client;
 let db;
 
 export async function connectDb() {
   if (db) return db;
+  if (!uri) {
+    throw new Error('MONGODB_URI environment variable is not set or not being loaded by the host platform');
+  }
   client = new MongoClient(uri);
   await client.connect();
   db = client.db(dbName);
