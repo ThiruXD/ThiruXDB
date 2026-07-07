@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Database, Search, ChevronRight, Menu, X, Github, BookOpen, Key, Terminal, Shield, Moon, Sun, Code, Cpu } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -24,6 +24,7 @@ export function DocsPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [activeId, setActiveId] = useState<string>('');
   const location = useLocation();
 
   const searchResults = useMemo(() => {
@@ -74,6 +75,25 @@ export function DocsPage() {
     }
     return result;
   }, [markdownContent]);
+
+  // Track active heading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-100px 0px -66% 0px' }
+    );
+
+    const elements = headings.map(h => document.getElementById(h.id)).filter(Boolean) as HTMLElement[];
+    elements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [headings, location.pathname]);
 
   // Next page for footer navigation
   const currentIndex = DOCS_PAGES.findIndex(p => p.id === validPath);
@@ -194,23 +214,34 @@ export function DocsPage() {
           )}
         </main>
 
-        {/* Right Sidebar (Table of Contents) */}
-        <aside className="hidden xl:block w-64 shrink-0 pt-14 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto pl-6 border-l border-gray-200 dark:border-gray-800">
+        {/* Right Sidebar (Table of Contents - Fumadocs Style) */}
+        <aside className="hidden xl:block w-56 shrink-0 pt-14 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto pl-8">
           <div className="py-8">
-            <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-4">On this page</h4>
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-4">On this page</h4>
             {headings.length > 0 ? (
-              <ul className="space-y-2.5 text-sm">
-                {headings.map(h => (
-                  <li key={h.id} className={h.level === 3 ? 'ml-4' : ''}>
-                    <a 
-                      href={`#${h.id}`}
-                      className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                    >
-                      {h.text}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <div className="border-l border-gray-200 dark:border-gray-800 flex flex-col">
+                <ul className="text-sm">
+                  {headings.map(h => {
+                    const isActive = activeId === h.id;
+                    return (
+                      <li key={h.id}>
+                        <a 
+                          href={`#${h.id}`}
+                          className={`block py-1.5 pr-2 -ml-[1px] border-l transition-colors ${
+                            h.level === 3 ? 'pl-8' : 'pl-4'
+                          } ${
+                            isActive 
+                              ? 'border-gray-900 dark:border-white text-gray-900 dark:text-white font-medium' 
+                              : 'border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
+                          }`}
+                        >
+                          {h.text}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             ) : (
               <p className="text-sm text-gray-400 dark:text-gray-600">No sections</p>
             )}
