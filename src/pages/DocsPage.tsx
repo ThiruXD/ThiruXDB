@@ -4,6 +4,8 @@ import { Database, Search, ChevronRight, Menu, X, Github, BookOpen, Key, Termina
 import { useTheme } from '../context/ThemeContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeSlug from 'rehype-slug';
+import GithubSlugger from 'github-slugger';
 
 // Load all markdown files as raw strings
 const markdownFiles = import.meta.glob('../docs/*.md', { query: '?raw', import: 'default', eager: true });
@@ -55,6 +57,23 @@ export function DocsPage() {
 
   // Find the content
   const markdownContent = (markdownFiles[`../docs/${validPath}.md`] as string) || '# 404 Not Found\n\nThe requested documentation page could not be found.';
+
+  // Extract headings for Table of Contents
+  const headings = useMemo(() => {
+    const slugger = new GithubSlugger();
+    const result: { id: string; text: string; level: number }[] = [];
+    const lines = markdownContent.split('\n');
+    for (const line of lines) {
+      const match = line.match(/^(#{2,3})\s+(.*)$/);
+      if (match) {
+        const text = match[2].trim();
+        const level = match[1].length;
+        const id = slugger.slug(text);
+        result.push({ id, text, level });
+      }
+    }
+    return result;
+  }, [markdownContent]);
 
   // Next page for footer navigation
   const currentIndex = DOCS_PAGES.findIndex(p => p.id === validPath);
@@ -160,7 +179,7 @@ export function DocsPage() {
         {/* Main Content */}
         <main className="flex-1 min-w-0 py-8 md:pl-10 md:pr-6 lg:pr-10 lg:pl-12">
           <article className="prose prose-slate dark:prose-invert max-w-3xl w-full prose-headings:font-bold prose-a:text-gray-900 dark:prose-a:text-white prose-pre:bg-gray-50 dark:prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-800 prose-pre:shadow-sm">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
               {markdownContent}
             </ReactMarkdown>
           </article>
@@ -174,6 +193,29 @@ export function DocsPage() {
             </div>
           )}
         </main>
+
+        {/* Right Sidebar (Table of Contents) */}
+        <aside className="hidden xl:block w-64 shrink-0 pt-14 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto pl-6 border-l border-gray-200 dark:border-gray-800">
+          <div className="py-8">
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-4">On this page</h4>
+            {headings.length > 0 ? (
+              <ul className="space-y-2.5 text-sm">
+                {headings.map(h => (
+                  <li key={h.id} className={h.level === 3 ? 'ml-4' : ''}>
+                    <a 
+                      href={`#${h.id}`}
+                      className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                    >
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-400 dark:text-gray-600">No sections</p>
+            )}
+          </div>
+        </aside>
       </div>
     </div>
   );
