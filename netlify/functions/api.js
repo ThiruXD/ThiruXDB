@@ -13,6 +13,7 @@ import { connectDb } from '../../server/db.js';
 let dbPromise = null;
 
 const handler = serverless(app, {
+  basePath: '/.netlify/functions',
   request: async (req, event, context) => {
     // Ensure DB connection is established before processing the route
     if (!dbPromise) {
