@@ -29,7 +29,7 @@ import { syntaxHighlight } from '../lib/utils';
 
 export function UsersPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'users' | 'activity' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'activity' | 'apikeys' | 'settings'>('users');
 
   // Users State
   const [users, setUsers] = useState<User[]>([]);
@@ -182,6 +182,13 @@ export function UsersPage() {
           <Activity className="w-4 h-4" /> Activity Logs
         </button>
         <button
+          onClick={() => setActiveTab('apikeys')}
+          className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium whitespace-nowrap transition ${activeTab === 'apikeys' ? 'border-gray-900 dark:border-white text-gray-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300'
+            }`}
+        >
+          <Globe className="w-4 h-4" /> API Gateway
+        </button>
+        <button
           onClick={() => setActiveTab('settings')}
           className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium whitespace-nowrap transition ${activeTab === 'settings' ? 'border-gray-900 dark:border-white text-gray-900 dark:text-white' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300'
             }`}
@@ -253,6 +260,9 @@ export function UsersPage() {
         </div>
         </div>
       )}
+      
+      {/* API Keys Tab */}
+      {activeTab === 'apikeys' && <APIKeysPanel />}
 
       {/* Settings Tab */}
       {activeTab === 'settings' && <SettingsPanel />}
@@ -683,6 +693,144 @@ function SettingsPanel() {
             Note: Changing this only applies to newly generated session tokens.
           </p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function APIKeysPanel() {
+  const [keys, setKeys] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [generatedKey, setGeneratedKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchKeys();
+  }, []);
+
+  const fetchKeys = async () => {
+    setLoading(true);
+    try {
+      const data = await api.getApiKeys();
+      setKeys(data);
+    } catch (e) {
+      console.error(e);
+    }
+    setLoading(false);
+  };
+
+  const handleCreate = async () => {
+    if (!newKeyName.trim()) return;
+    try {
+      const res = await api.createApiKey(newKeyName);
+      setGeneratedKey(res.full_key);
+      setNewKeyName('');
+      fetchKeys();
+    } catch (e) {
+      alert('Failed to generate key');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to revoke this API key? This action is permanent and will instantly break any apps using it.')) return;
+    try {
+      await api.deleteApiKey(id);
+      fetchKeys();
+    } catch (e) {
+      alert('Failed to revoke key');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {generatedKey && (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 relative">
+          <button onClick={() => setGeneratedKey(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+            <X className="w-5 h-5" />
+          </button>
+          <h3 className="text-green-800 dark:text-green-400 font-bold mb-2 flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5" /> API Key Generated Successfully!
+          </h3>
+          <p className="text-green-700 dark:text-green-500 mb-4 text-sm">
+            Please copy this key immediately. For security reasons, we only store the hash of this key and it will NEVER be shown again!
+          </p>
+          <div className="flex gap-2">
+            <code className="flex-1 bg-white dark:bg-black border border-green-200 dark:border-green-800 p-3 rounded text-sm break-all font-mono">
+              {generatedKey}
+            </code>
+            <button 
+              onClick={() => { navigator.clipboard.writeText(generatedKey); alert('Copied!'); }}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition"
+            >
+              <Copy className="w-4 h-4" /> Copy
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        <div>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Public API Gateway</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Generate API Keys to securely query aggregated data from external applications via <code className="bg-gray-100 dark:bg-gray-900 px-1 rounded text-xs text-indigo-500">/api/v1/public/:collection</code></p>
+        </div>
+        <div className="flex gap-2 w-full md:w-auto">
+          <input
+            type="text"
+            placeholder="Key Name (e.g., Marketing Dashboard)"
+            className="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-900 dark:text-white"
+            value={newKeyName}
+            onChange={(e) => setNewKeyName(e.target.value)}
+          />
+          <button 
+            onClick={handleCreate}
+            disabled={!newKeyName.trim()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition disabled:opacity-50 whitespace-nowrap"
+          >
+            Generate Key
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        {loading ? (
+          <div className="p-8 text-center text-gray-500">Loading API Keys...</div>
+        ) : keys.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            <Globe className="w-12 h-12 mx-auto mb-3 opacity-20" />
+            <p>No API keys generated yet.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+              <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-gray-500">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Key Name</th>
+                  <th className="px-6 py-4 font-medium">Prefix</th>
+                  <th className="px-6 py-4 font-medium">Created By</th>
+                  <th className="px-6 py-4 font-medium">Last Used</th>
+                  <th className="px-6 py-4 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700/50">
+                {keys.map((k) => (
+                  <tr key={k._id} className="hover:bg-gray-50 dark:bg-gray-700/20 transition">
+                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{k.name}</td>
+                    <td className="px-6 py-4 font-mono text-xs">{k.prefix}</td>
+                    <td className="px-6 py-4">{k.created_by}</td>
+                    <td className="px-6 py-4">
+                      {k.last_used ? new Date(k.last_used).toLocaleString() : <span className="text-gray-400">Never</span>}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => handleDelete(k._id)} className="p-2 text-gray-400 hover:text-red-400 transition" title="Revoke Key">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

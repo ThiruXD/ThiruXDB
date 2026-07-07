@@ -16,6 +16,8 @@ import logsRouter from './routes/logs.js';
 import dashboardRouter from './routes/dashboard.js';
 import authRouter from './routes/auth.js';
 import usersRouter from './routes/users.js';
+import apikeysRouter from './routes/apikeys.js';
+import gatewayRouter from './routes/gateway.js';
 import { authenticateToken } from './authMiddleware.js';
 
 const app = express();
@@ -72,6 +74,10 @@ app.use('/api/records', authenticateToken, recordsRouter);
 app.use('/api/logs', authenticateToken, logsRouter);
 app.use('/api/dashboard', authenticateToken, dashboardRouter);
 app.use('/api/users', usersRouter); // auth is applied inside the router
+app.use('/api/apikeys', apikeysRouter); // auth is applied inside the router
+
+// Public API Gateway (Auth is handled internally via API Keys)
+app.use('/api/v1/public', gatewayRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));

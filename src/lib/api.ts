@@ -18,6 +18,16 @@ import type {
   ActivityLog,
 } from '../types/database';
 
+export interface ApiKey {
+  _id: string;
+  name: string;
+  prefix: string;
+  created_at: string;
+  created_by: string;
+  is_active: boolean;
+  last_used: string | null;
+}
+
 const BASE = '/api';
 
 async function request<T>(
@@ -163,6 +173,12 @@ export const api = {
   getSettings: (): Promise<{ session_timeout: string }> => request('/users/settings'),
   updateSettings: (data: { session_timeout: string }): Promise<{ success: boolean }> => 
     request('/users/settings', { method: 'POST', body: JSON.stringify(data) }),
+
+  getApiKeys: (): Promise<ApiKey[]> => request('/apikeys'),
+  createApiKey: (name: string): Promise<{ success: boolean, key: ApiKey, full_key: string }> => 
+    request('/apikeys', { method: 'POST', body: JSON.stringify({ name }) }),
+  deleteApiKey: (id: string): Promise<{ success: boolean }> =>
+    request(`/apikeys/${id}`, { method: 'DELETE' }),
 
   deleteLog: (id: string): Promise<{ success: boolean }> =>
     request(`/logs/${id}`, { method: 'DELETE' }),
