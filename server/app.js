@@ -92,11 +92,19 @@ if (!process.env.NETLIFY) {
     // Fallback to process.cwd() if path resolution fails in bundled environments
   }
   
+  const docsPath = path.join(dir, '../doc_build');
+  app.use('/docs', express.static(docsPath));
+
   const distPath = path.join(dir, '../dist');
   app.use(express.static(distPath));
 
-  // Fallback to index.html for React Router
+  // Fallback
   app.get('*', (req, res) => {
+    if (req.path.startsWith('/docs')) {
+      return res.sendFile(path.join(docsPath, '404.html'), (err) => {
+        if (err) res.sendFile(path.join(docsPath, 'index.html'));
+      });
+    }
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }

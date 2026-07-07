@@ -20,7 +20,7 @@ export function LandingPage() {
             <span className="font-bold text-lg text-gray-900 dark:text-white tracking-tight">ThiruXDB</span>
           </Link>
           <div className="flex items-center gap-4 sm:gap-6">
-            <Link to="/docs" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition hidden sm:block">Documentation</Link>
+            <a href="/docs/" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition hidden sm:block">Documentation</a>
             <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">
               <Github className="w-5 h-5" />
             </a>
@@ -58,9 +58,9 @@ export function LandingPage() {
             <Link to="/login" className="w-full sm:w-auto px-6 py-3 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-medium flex items-center justify-center gap-2 transition shadow-sm">
               Live Demo <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link to="/docs" className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium flex items-center justify-center transition shadow-sm">
-              Read Documentation
-            </Link>
+            <a href="/docs/" className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium flex items-center justify-center transition shadow-sm">
+              Read Docs
+            </a>
           </div>
 
           <div className="relative inline-block mt-4 group">
@@ -258,7 +258,7 @@ export function LandingPage() {
             &copy; {new Date().getFullYear()} ThiruXD. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <Link to="/docs" className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">Docs</Link>
+            <a href="/docs/" className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">Docs</a>
             <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noreferrer" className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">GitHub</a>
           </div>
         </div>
