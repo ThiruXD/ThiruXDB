@@ -65,7 +65,7 @@ router.post('/test', async (req, res) => {
     let finalUrl = base_url;
 
     if (path_variables && path_variables.length > 0) {
-      const db = require('../db.js').getDb();
+      const db = getDb();
       for (const pv of path_variables) {
         if (pv.variable && pv.source_collection && pv.source_field) {
           const s = pv.source_field;
@@ -241,7 +241,7 @@ router.post('/:id/sync', async (req, res) => {
   const skipOffset = req.body.skipOffset || 0;
 
   try {
-    const db = require('../db.js').getDb();
+    const db = getDb();
     const existing = await db.collection('thiruxdb_sync_jobs').findOne({ endpoint_id: endpointId });
     if (existing && existing.status !== 'completed' && existing.status !== 'error' && existing.status !== 'partial') {
       const lastUpdate = existing.updated_at ? new Date(existing.updated_at) : new Date(0);
@@ -294,7 +294,7 @@ router.post('/:id/sync', async (req, res) => {
 
 router.get('/active-syncs', async (req, res) => {
   try {
-    const db = require('../db.js').getDb();
+    const db = getDb();
     const activeJobs = await db.collection('thiruxdb_sync_jobs').find({
       status: { $in: ['running', 'downloading'] },
       cancelled: { $ne: true }
@@ -309,7 +309,7 @@ router.get('/active-syncs', async (req, res) => {
 
 router.get('/:id/sync-status', async (req, res) => {
   try {
-    const db = require('../db.js').getDb();
+    const db = getDb();
     const job = await db.collection('thiruxdb_sync_jobs').findOne({ endpoint_id: req.params.id });
     if (!job) return res.json({ status: 'idle', current: 0, total: 0 });
     res.json(job);
@@ -320,7 +320,7 @@ router.get('/:id/sync-status', async (req, res) => {
 
 router.get('/:id/live-logs', async (req, res) => {
   try {
-    const db = require('../db.js').getDb();
+    const db = getDb();
     const logs = await db.collection('thiruxdb_live_logs')
       .find({ endpoint_id: req.params.id })
       .sort({ timestamp: 1 })
@@ -333,7 +333,7 @@ router.get('/:id/live-logs', async (req, res) => {
 
 router.delete('/:id/live-logs', async (req, res) => {
   try {
-    const db = require('../db.js').getDb();
+    const db = getDb();
     await db.collection('thiruxdb_live_logs').deleteMany({ endpoint_id: req.params.id });
     res.json({ success: true });
   } catch (e) {
@@ -343,7 +343,7 @@ router.delete('/:id/live-logs', async (req, res) => {
 
 router.post('/:id/cancel-sync', async (req, res) => {
   try {
-    const db = require('../db.js').getDb();
+    const db = getDb();
     const result = await db.collection('thiruxdb_sync_jobs').findOneAndUpdate(
       { endpoint_id: req.params.id },
       { $set: { cancelled: true, updated_at: new Date() } },
@@ -361,7 +361,7 @@ router.post('/:id/cancel-sync', async (req, res) => {
 
 router.post('/sync-stats', async (req, res) => {
   try {
-    const db = require('../db.js').getDb();
+    const db = getDb();
     const endpoints = await db.collection('thiruxdb_api_endpoints').find({}).toArray();
     for (const ep of endpoints) {
       let count = 0;
