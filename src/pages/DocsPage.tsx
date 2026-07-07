@@ -178,7 +178,7 @@ export function DocsPage() {
 
         {/* Main Content */}
         <main className="flex-1 min-w-0 py-8 md:pl-10 md:pr-6 lg:pr-10 lg:pl-12">
-          <article className="prose prose-slate dark:prose-invert max-w-3xl w-full prose-headings:font-bold prose-a:text-gray-900 dark:prose-a:text-white prose-pre:bg-gray-50 dark:prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-800 prose-pre:shadow-sm">
+          <article className="prose prose-slate dark:prose-invert max-w-3xl w-full prose-headings:font-bold prose-a:text-gray-900 dark:prose-a:text-white prose-pre:bg-gray-50 dark:prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-800 prose-pre:shadow-sm prose-pre:text-gray-900 dark:prose-pre:text-gray-100">
             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
               {markdownContent}
             </ReactMarkdown>
