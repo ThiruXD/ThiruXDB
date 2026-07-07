@@ -13,7 +13,7 @@ const DOCS_PAGES = [
 ];
 
 export function DocsPage() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -34,20 +34,20 @@ export function DocsPage() {
             <span className="font-bold text-gray-900 dark:text-white">ThiruXDB</span>
             <span className="text-xs px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium ml-2 hidden sm:block">Docs</span>
           </Link>
-          
+
           <div className="flex-1 flex items-center justify-between">
             <div className="w-full max-w-md hidden md:flex items-center relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3" />
-              <input 
-                type="text" 
-                placeholder="Search documentation..." 
+              <input
+                type="text"
+                placeholder="Search documentation..."
                 className="w-full bg-gray-100 dark:bg-zinc-900 border-none rounded-md pl-9 pr-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-700 transition-shadow"
               />
             </div>
             <div className="flex items-center gap-4 ml-auto">
-              <Link to="/dashboard" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition hidden sm:block">Dashboard</Link>
+              <Link to="/dashboard" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition hidden sm:block">Live Demo</Link>
               <button
-                onClick={() => toggleTheme(theme === 'dark' ? 'light' : 'dark')}
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition"
                 title="Toggle Theme"
               >
@@ -73,11 +73,10 @@ export function DocsPage() {
                   key={page.id}
                   to={`/docs/${page.id}`}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-2 py-1.5 rounded-md text-sm transition-colors ${
-                    isActive 
-                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-medium' 
+                  className={`flex items-center gap-3 px-2 py-1.5 rounded-md text-sm transition-colors ${isActive
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-medium'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-900/50 hover:text-gray-900 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   <page.icon className="w-4 h-4" />
                   {page.title}
@@ -172,7 +171,7 @@ function ArchitectureContent() {
 
       <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Monolithic Architecture</h2>
       <p>ThiruXDB operates as a seamless monolith to simplify deployment across serverless platforms like Netlify and Render.</p>
-      
+
       <div className="my-6 border border-slate-200 dark:border-slate-800 rounded-lg p-6 bg-slate-50 dark:bg-slate-900 text-sm overflow-x-auto font-mono text-slate-800 dark:text-slate-300">
         <pre className="m-0">
           ├── /src                # React Frontend (Dashboard, Docs, Landing){'\n'}
@@ -273,7 +272,7 @@ function DevelopmentContent() {
 
       <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Local Development Workflow</h2>
       <p>ThiruXDB uses `bun` to run both the React frontend and the Express backend simultaneously during development.</p>
-      
+
       <pre className="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-50 p-4 rounded-lg overflow-x-auto text-sm my-4 border border-slate-200 dark:border-slate-800 shadow-sm">
         <code className="language-bash">
           bun run dev
@@ -283,7 +282,7 @@ function DevelopmentContent() {
 
       <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Modifying the Database Schema</h2>
       <p>ThiruXDB uses the native `mongodb` driver. Because there are no rigid ORMs (like Mongoose or Prisma), modifying collections is as simple as inserting new fields. All collections use the `thiruxdb_` prefix.</p>
-      
+
       <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Contributing Guidelines</h2>
       <ol className="list-decimal pl-5 space-y-2">
         <li><strong>Fork the repository</strong> and create your feature branch (`git checkout -b feature/AmazingFeature`).</li>
@@ -298,9 +297,9 @@ function DevelopmentContent() {
 
 // Icons for the content
 function SettingsIcon(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
+  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>;
 }
 
 function RefreshIcon(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>;
+  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>;
 }

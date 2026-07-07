@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Database, ArrowRight, Server, Shield, Zap, Code, Github, Moon, Sun, Terminal, Key, DatabaseBackup, Users } from 'lucide-react';
+import { Database, ArrowRight, Server, Shield, Zap, Code, Github, Moon, Sun, Terminal, Key, DatabaseBackup, Users, Activity, RefreshCw, Webhook, Briefcase, Rocket, Laptop } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 export function LandingPage() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 font-sans selection:bg-gray-300 dark:selection:bg-gray-700 flex flex-col">
@@ -25,15 +25,12 @@ export function LandingPage() {
               <Github className="w-5 h-5" />
             </a>
             <button
-              onClick={() => toggleTheme(theme === 'dark' ? 'light' : 'dark')}
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition"
               title="Toggle Theme"
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <Link to="/dashboard" className="text-sm font-medium px-4 py-2 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-md hover:bg-gray-800 dark:hover:bg-gray-100 transition shadow-sm ml-2">
-              Dashboard
-            </Link>
           </div>
         </div>
       </nav>
@@ -45,14 +42,14 @@ export function LandingPage() {
             <Zap className="w-3.5 h-3.5" />
             <span>v0.1.0 is now live</span>
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white tracking-tight mb-8 leading-tight">
             The Utilitarian API <br className="hidden md:block" />
             <span className="text-gray-900 dark:text-white">
               Data Aggregation Hub
             </span>
           </h1>
-          
+
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
             Self-host your own data engine. Configure external REST endpoints, automate data fetching into MongoDB, and serve everything through an ultra-fast, rate-limited public API gateway.
           </p>
@@ -66,10 +63,19 @@ export function LandingPage() {
             </Link>
           </div>
 
-          <div className="inline-block bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 px-6 py-3 rounded-lg text-sm text-left shadow-sm">
-            <p className="font-semibold mb-1">Live Demo Credentials:</p>
-            <p>Username: <code className="bg-white dark:bg-zinc-900 px-1 py-0.5 rounded font-mono border border-blue-100 dark:border-blue-700">demo</code></p>
-            <p>Password: <code className="bg-white dark:bg-zinc-900 px-1 py-0.5 rounded font-mono border border-blue-100 dark:border-blue-700">demo@123</code></p>
+          <div className="relative inline-block mt-4 group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-300 to-gray-500 dark:from-gray-700 dark:to-gray-500 rounded-lg blur opacity-40 group-hover:opacity-70 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+            <div className="relative bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-800 text-gray-800 dark:text-gray-300 px-6 py-4 rounded-lg text-sm text-left shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </div>
+                <p className="font-semibold text-gray-900 dark:text-white">Live Demo Credentials</p>
+              </div>
+              <p className="mb-1 text-gray-600 dark:text-gray-400">Username: <code className="text-gray-900 dark:text-white bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono border border-gray-200 dark:border-gray-700">demo</code></p>
+              <p className="text-gray-600 dark:text-gray-400">Password: <code className="text-gray-900 dark:text-white bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono border border-gray-200 dark:border-gray-700">demo@123</code></p>
+            </div>
           </div>
         </main>
 
@@ -87,7 +93,7 @@ export function LandingPage() {
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Automated Sync</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Automatically batch and insert thousands of records simultaneously from external APIs into your MongoDB database at maximum wire speed.</p>
             </div>
-            
+
             <div className="p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-colors shadow-sm">
               <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-5 border border-gray-200 dark:border-gray-700">
                 <Code className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -102,6 +108,30 @@ export function LandingPage() {
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Robust Security</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Built-in Role-Based Access Control, session hijacking prevention, dynamic zero-config JWT management via Web Crypto, and granular permissions.</p>
+            </div>
+
+            <div className="p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-colors shadow-sm">
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-5 border border-gray-200 dark:border-gray-700">
+                <Activity className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Built-in Analytics</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Monitor all incoming and outgoing API traffic natively without needing external tracking software. Get granular logs directly from the dashboard.</p>
+            </div>
+
+            <div className="p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-colors shadow-sm">
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-5 border border-gray-200 dark:border-gray-700">
+                <RefreshCw className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Hot Reload Configs</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Any changes to endpoints, API keys, or settings take effect immediately. No need to restart the server or wait for costly build steps.</p>
+            </div>
+
+            <div className="p-6 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-colors shadow-sm">
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-5 border border-gray-200 dark:border-gray-700">
+                <Webhook className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Flexible Integrations</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Map nested JSON structures seamlessly. ThiruXDB's sync engine traverses deep into arrays to extract exactly the data you need from any provider.</p>
             </div>
           </div>
         </section>
@@ -147,6 +177,50 @@ export function LandingPage() {
               <div>
                 <h4 className="font-bold text-gray-900 dark:text-white text-lg mb-1">Internal Tooling</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Give your non-technical team a clean UI to browse, filter, and export data without needing direct MongoDB database access.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Who is this for */}
+        <section className="py-16 border-t border-gray-200 dark:border-gray-800 bg-gray-100/50 dark:bg-gray-900/10 -mx-6 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Who is this for?</h2>
+              <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">ThiruXDB is crafted for developers and teams who want complete ownership of their data streams.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm text-center flex flex-col items-center">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <Laptop className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                </div>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-2">Frontend Developers</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Stop writing complex backend proxy logic. Let ThiruXDB fetch external data so you can just query your own fast API gateway.</p>
+              </div>
+
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm text-center flex flex-col items-center">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <Rocket className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                </div>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-2">Indie Hackers</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Build products faster without worrying about 3rd-party API rate limits crippling your app during sudden traffic spikes.</p>
+              </div>
+
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm text-center flex flex-col items-center">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <Briefcase className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                </div>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-2">Agencies</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Provide clients with a clean, restricted dashboard to view data logs without giving them raw database access.</p>
+              </div>
+
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm text-center flex flex-col items-center">
+                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                  <Database className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                </div>
+                <h4 className="font-bold text-gray-900 dark:text-white mb-2">Data Engineers</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Automate cron-job based polling of multiple distinct APIs and consolidate them into a single MongoDB structure reliably.</p>
               </div>
             </div>
           </div>
