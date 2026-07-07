@@ -24,14 +24,6 @@ connectDb()
       console.error('Failed to cleanup dangling sync jobs:', e.message);
     }
 
-    if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'thiruxdb_super_secret_key_change_me') {
-      console.warn('\n' + '='.repeat(60));
-      console.warn('🚨 SECURITY WARNING: YOU ARE USING THE DEFAULT JWT_SECRET!');
-      console.warn('🚨 ANYONE CAN FORGE ADMIN TOKENS AND HIJACK YOUR DASHBOARD!');
-      console.warn('🚨 SET JWT_SECRET IN YOUR ENVIRONMENT VARIABLES IMMEDIATELY!');
-      console.warn('='.repeat(60) + '\n');
-    }
-
     // Anti-Sleep Self-Ping for Free Tier Hosting (like Render.com)
     // Render automatically sets RENDER_EXTERNAL_URL
     const publicUrl = process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL;

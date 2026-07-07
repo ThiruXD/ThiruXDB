@@ -3,11 +3,9 @@
  * Author: ThiruXD
  * Description: A self-hosted API data aggregation dashboard — configure external REST endpoints, fetch & store their data into MongoDB, browse and search records, all from a clean web UI.
  */
-import jwt from 'jsonwebtoken';
-
+import * as jose from 'jose';
 import { getDb } from './db.js';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'thiruxdb_super_secret_key_change_me';
+import { getJwtSecret } from './jwtSecret.js';
 
 import requestIp from 'request-ip';
 import bcrypt from 'bcryptjs';
@@ -20,14 +18,15 @@ function verifyFingerprint(req, tokenFingerprint) {
   return bcrypt.compareSync(`${ip}-${ua}`, tokenFingerprint);
 }
 
-export function authenticateToken(req, res, next) {
+export async function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
 
-  jwt.verify(token, JWT_SECRET, async (err, decodedUser) => {
-    if (err) return res.status(403).json({ error: 'Invalid or expired token.' });
+  try {
+    const secret = await getJwtSecret();
+    const { payload: decodedUser } = await jose.jwtVerify(token, secret);
     
     // Anti-Hijacking Check!
     if (decodedUser.fingerprint && !verifyFingerprint(req, decodedUser.fingerprint)) {
@@ -41,31 +40,35 @@ export function authenticateToken(req, res, next) {
       return next();
     }
 
-    try {
-      const db = getDb();
-      const userDoc = await db.collection('thiruxdb_users').findOne({ username: decodedUser.username });
-      
-      if (!userDoc) {
-        return res.status(401).json({ error: 'User no longer exists.' });
-      }
-      
-      if (!userDoc.is_active) {
-        return res.status(403).json({ error: 'User account is disabled.' });
-      }
-
-      req.user = {
-        id: userDoc._id.toString(),
-        username: userDoc.username,
-        role: userDoc.role,
-        is_active: userDoc.is_active,
-        restricted_pages: userDoc.restricted_pages || []
-      };
-      next();
-    } catch (dbErr) {
-      console.error('Auth DB Error:', dbErr);
-      return res.status(500).json({ error: 'Database error during authentication.' });
+    const db = getDb();
+    const userDoc = await db.collection('thiruxdb_users').findOne({ username: decodedUser.username });
+    
+    if (!userDoc) {
+      return res.status(401).json({ error: 'User no longer exists.' });
     }
-  });
+    
+    if (!userDoc.is_active) {
+      return res.status(403).json({ error: 'User account is disabled.' });
+    }
+
+    req.user = {
+      id: userDoc._id.toString(),
+      username: userDoc.username,
+      role: userDoc.role,
+      is_active: userDoc.is_active,
+      restricted_pages: userDoc.restricted_pages || []
+    };
+    next();
+  } catch (err) {
+    if (err.code === 'ERR_JWT_EXPIRED') {
+      return res.status(403).json({ error: 'Token expired.' });
+    }
+    if (err.code === 'ERR_JWS_INVALID' || err.code === 'ERR_JWS_SIGNATURE_VERIFICATION_FAILED') {
+      return res.status(403).json({ error: 'Invalid token.' });
+    }
+    console.error('Auth Error:', err);
+    return res.status(500).json({ error: 'Database error during authentication.' });
+  }
 }
 
 export function requireRole(roles) {

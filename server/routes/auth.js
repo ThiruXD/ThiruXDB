@@ -5,14 +5,15 @@
  */
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import * as jose from 'jose';
 import { getDb } from '../db.js';
 import { authenticateToken } from '../authMiddleware.js';
 import requestIp from 'request-ip';
 import { UAParser } from 'ua-parser-js';
 
+import { getJwtSecret } from '../jwtSecret.js';
+
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'thiruxdb_super_secret_key_change_me';
 const JWT_EXPIRES_IN = '24h';
 
 // Generate a security fingerprint for the session
@@ -125,18 +126,18 @@ router.post('/login', async (req, res) => {
     }
 
     const fingerprint = generateFingerprint(req);
+    const secret = await getJwtSecret();
 
-    const token = jwt.sign(
-      { 
-        id: user._id.toString(), 
-        username: user.username, 
-        role: user.role, 
-        restricted_pages: user.restricted_pages || [],
-        fingerprint // Embed the fingerprint into the token!
-      },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const token = await new jose.SignJWT({
+      id: user._id.toString(),
+      username: user.username,
+      role: user.role,
+      restricted_pages: user.restricted_pages || [],
+      fingerprint // Embed the fingerprint into the token!
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setExpirationTime(JWT_EXPIRES_IN)
+      .sign(secret);
 
     await logUserActivity(user._id, 'login', req);
 
