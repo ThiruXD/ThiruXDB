@@ -16,6 +16,8 @@ import { DataBrowserPage } from './components/DataBrowserPage';
 import { LogsPage } from './components/LogsPage';
 import { UsersPage } from './components/UsersPage';
 import LiveLogsPage from './components/LiveLogsPage';
+import { LandingPage } from './pages/LandingPage';
+import { DocsPage } from './pages/DocsPage';
 
 function DashboardWrapper() {
   const { isAuthenticated, user } = useAuth();
@@ -73,7 +75,8 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/docs/*" element={<DocsPage />} />
             <Route path="/dashboard" element={<DashboardWrapper />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

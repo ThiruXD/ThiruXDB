@@ -92,26 +92,12 @@ if (!process.env.NETLIFY) {
     // Fallback to process.cwd() if path resolution fails in bundled environments
   }
   
-  const docsPath = path.join(dir, '../doc_build');
   const distPath = path.join(dir, '../dist');
-
-  // Serve static files from Rspress (Landing & Docs)
-  app.use(express.static(docsPath));
-  
-  // Serve static files from Vite App
   app.use(express.static(distPath));
 
-  // Fallback routing
+  // Fallback to index.html for React Router
   app.get('*', (req, res) => {
-    const reactRoutes = ['/dashboard', '/login'];
-    if (reactRoutes.some(r => req.path.startsWith(r))) {
-      return res.sendFile(path.join(distPath, 'index.html'));
-    }
-    
-    // Default fallback to Rspress 404
-    res.sendFile(path.join(docsPath, '404.html'), (err) => {
-      if (err) res.sendFile(path.join(distPath, 'index.html'));
-    });
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 
