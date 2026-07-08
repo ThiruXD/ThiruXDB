@@ -4,6 +4,7 @@ import { FrameworkProvider } from 'fumadocs-core/framework';
 import { useMemo } from 'react';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsPage as FumaDocsPage, DocsBody, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -63,7 +64,7 @@ export function DocsPage() {
           <FumaDocsPage toc={[]}>
             <DocsTitle>{page.title}</DocsTitle>
             <DocsBody>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={defaultMdxComponents as any}>
                 {contentWithoutH1}
               </ReactMarkdown>
             </DocsBody>
