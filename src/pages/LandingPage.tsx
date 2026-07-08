@@ -1,9 +1,22 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Database, ArrowRight, Server, Shield, Zap, Code, Github, Moon, Sun, Terminal, Key, DatabaseBackup, Users, Activity, RefreshCw, Webhook, Briefcase, Rocket, Laptop } from 'lucide-react';
+import { Database, ArrowRight, Server, Shield, Zap, Code, Github, Moon, Sun, Terminal, Key, DatabaseBackup, Users, Activity, RefreshCw, Webhook, Briefcase, Rocket, Laptop, Star, GitFork } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
+  const [githubStats, setGithubStats] = useState({ stars: 0, forks: 0 });
+
+  useEffect(() => {
+    fetch('https://api.github.com/repos/ThiruXD/ThiruXDB')
+      .then(res => res.json())
+      .then(data => {
+        if (data.stargazers_count !== undefined) {
+          setGithubStats({ stars: data.stargazers_count, forks: data.forks_count });
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 font-sans selection:bg-gray-300 dark:selection:bg-gray-700 flex flex-col">
@@ -11,7 +24,7 @@ export function LandingPage() {
       <div className="fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMTU2LCAxNjMsIDE3NSwgMC4xNSkiLz48L3N2Zz4=')] [mask-image:linear-gradient(to_bottom,white,transparent)] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4wNSkiLz48L3N2Zz4=')] pointer-events-none z-0" />
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
+      <nav className="fixed top-0 inset-x-0 z-50 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 bg-gray-900 dark:bg-white rounded flex items-center justify-center shadow-sm">
@@ -21,8 +34,17 @@ export function LandingPage() {
           </Link>
           <div className="flex items-center gap-4 sm:gap-6">
             <Link to="/docs" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition hidden sm:block">Documentation</Link>
-            <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">
-              <Github className="w-5 h-5" />
+            <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noreferrer" className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-3 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-gray-200 dark:border-zinc-800">
+                <div className="flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5" /> {githubStats.stars}
+                </div>
+                <div className="w-px h-3 bg-gray-300 dark:bg-zinc-700"></div>
+                <div className="flex items-center gap-1">
+                  <GitFork className="w-3.5 h-3.5" /> {githubStats.forks}
+                </div>
+              </div>
+              <Github className="w-5 h-5 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition" />
             </a>
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -35,7 +57,7 @@ export function LandingPage() {
         </div>
       </nav>
 
-      <div className="flex-1 w-full max-w-7xl mx-auto px-6 relative z-10 flex flex-col">
+      <div className="flex-1 w-full max-w-7xl mx-auto px-6 relative z-10 flex flex-col pt-16">
         {/* Hero Section */}
         <main className="pt-24 pb-16 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium mb-8 shadow-sm">
@@ -61,21 +83,6 @@ export function LandingPage() {
             <Link to="/docs" className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium flex items-center justify-center transition shadow-sm">
               Read Documentation
             </Link>
-          </div>
-
-          <div className="relative inline-block mt-4 group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-300 to-gray-500 dark:from-gray-700 dark:to-gray-500 rounded-lg blur opacity-40 group-hover:opacity-70 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
-            <div className="relative bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-800 text-gray-800 dark:text-gray-300 px-6 py-4 rounded-lg text-sm text-left shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </div>
-                <p className="font-semibold text-gray-900 dark:text-white">Live Demo Credentials</p>
-              </div>
-              <p className="mb-1 text-gray-600 dark:text-gray-400">Username: <code className="text-gray-900 dark:text-white bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono border border-gray-200 dark:border-gray-700">demo</code></p>
-              <p className="text-gray-600 dark:text-gray-400">Password: <code className="text-gray-900 dark:text-white bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono border border-gray-200 dark:border-gray-700">demo@123</code></p>
-            </div>
           </div>
         </main>
 
@@ -189,7 +196,7 @@ export function LandingPage() {
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Who is this for?</h2>
               <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">ThiruXDB is crafted for developers and teams who want complete ownership of their data streams.</p>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-sm text-center flex flex-col items-center">
                 <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
