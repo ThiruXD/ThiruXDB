@@ -17,11 +17,6 @@
   }
 }
 
-@layer utilities {
-  .min-h-screen {
-    min-height: 100vh; /* Fallback for older browsers */
-    min-height: 100dvh; /* Fixes mobile white bar gap */
-  }
-}
+
 
 
