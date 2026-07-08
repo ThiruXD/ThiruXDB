@@ -88,7 +88,7 @@ export function LandingPage() {
 
           <div className="my-1"></div>
           <Link to="/docs" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-900 dark:text-white border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900/40 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors shadow-sm">
-            <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Docs
+            <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Documentation
           </Link>
 
           <div className="mt-4 border-t border-gray-200 dark:border-zinc-800 pt-4 px-2">
