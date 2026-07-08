@@ -41,11 +41,13 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md relative">
+      <div className="w-full max-w-md">
         {isDemoSite && (
-          <Link to="/" className="absolute -top-12 left-0 flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm font-medium">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
-          </Link>
+          <div className="mb-4 sm:mb-6 pl-1">
+            <Link to="/" className="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm font-medium">
+              <ArrowLeft className="w-4 h-4" /> Back to Home
+            </Link>
+          </div>
         )}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 p-8">
           <div className="flex flex-col items-center mb-8">
