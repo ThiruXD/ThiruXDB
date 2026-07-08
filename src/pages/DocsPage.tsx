@@ -4,8 +4,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import rehypeHighlight from 'rehype-highlight';
-import { Menu, X, Sun, Moon, ArrowLeft, Github, Database, BookOpen, Layers, Network, RefreshCw, ShieldCheck, Code, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Menu, X, Sun, Moon, ArrowLeft, Github, Database, BookOpen, Layers, Network, RefreshCw, ShieldCheck, Code, Search, ChevronLeft, ChevronRight, Star, GitFork } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useGithubStats } from '../hooks/useGithubStats';
 import 'highlight.js/styles/atom-one-dark.css'; // Premium dark theme for syntax highlighting
 
 const markdownFiles = import.meta.glob('../docs/*.md', { query: '?raw', import: 'default', eager: true });
@@ -40,6 +41,7 @@ export function DocsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const githubStats = useGithubStats();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeHeadingId, setActiveHeadingId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -137,8 +139,17 @@ export function DocsPage() {
             <Link to="/" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors hidden sm:flex items-center gap-1.5">
               <ArrowLeft className="w-4 h-4" /> Back to Home
             </Link>
-            <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noopener noreferrer" className="p-2 text-gray-500 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
-              <Github className="w-5 h-5" />
+            <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-3 text-xs font-medium text-gray-500 dark:text-zinc-400 bg-gray-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-gray-200 dark:border-zinc-800">
+                <div className="flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5" /> {githubStats.stars}
+                </div>
+                <div className="w-px h-3 bg-gray-300 dark:bg-zinc-700"></div>
+                <div className="flex items-center gap-1">
+                  <GitFork className="w-3.5 h-3.5" /> {githubStats.forks}
+                </div>
+              </div>
+              <Github className="w-5 h-5 text-gray-600 hover:text-gray-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors" />
             </a>
             <button
               onClick={toggleTheme}

@@ -2,21 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Database, ArrowRight, Server, Shield, Zap, Code, Github, Moon, Sun, Terminal, Key, DatabaseBackup, Users, Activity, RefreshCw, Webhook, Briefcase, Rocket, Laptop, Star, GitFork } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useGithubStats } from '../hooks/useGithubStats';
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
-  const [githubStats, setGithubStats] = useState({ stars: 0, forks: 0 });
-
-  useEffect(() => {
-    fetch('https://api.github.com/repos/ThiruXD/ThiruXDB')
-      .then(res => res.json())
-      .then(data => {
-        if (data.stargazers_count !== undefined) {
-          setGithubStats({ stars: data.stargazers_count, forks: data.forks_count });
-        }
-      })
-      .catch(console.error);
-  }, []);
+  const githubStats = useGithubStats();
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 font-sans selection:bg-gray-300 dark:selection:bg-gray-700 flex flex-col">
