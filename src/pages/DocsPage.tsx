@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
+import GithubSlugger from 'github-slugger';
 import rehypeHighlight from 'rehype-highlight';
 import { Menu, X, Sun, Moon, ArrowLeft, Github, Database, BookOpen, Layers, Network, RefreshCw, ShieldCheck, Code, Search, ChevronLeft, ChevronRight, Star, GitFork, Check, Copy, Rocket } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -97,11 +98,12 @@ export function DocsPage() {
   const contentWithoutH1 = markdownContent.replace(/^#\s+.*$/m, '');
 
   const toc = useMemo(() => {
+    const slugger = new GithubSlugger();
     const matches = Array.from(contentWithoutH1.matchAll(/^(##|###)\s+(.+)$/gm));
     return matches.map((match) => {
       const depth = match[1].length;
       const title = match[2].trim();
-      const url = '#' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const url = '#' + slugger.slug(title);
       return { title, url, depth };
     });
   }, [contentWithoutH1]);
@@ -375,6 +377,15 @@ export function DocsPage() {
                   <li key={index} style={{ paddingLeft: `${(item.depth - 2) * 1}rem` }}>
                     <a
                       href={item.url}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const element = document.getElementById(item.url.slice(1));
+                        if (element) {
+                          const y = element.getBoundingClientRect().top + window.scrollY - 80;
+                          window.scrollTo({ top: y, behavior: 'smooth' });
+                          window.history.pushState(null, '', item.url);
+                        }
+                      }}
                       className={`block border-l-2 py-1 pl-3 transition-all duration-200 ${
                         activeHeadingId === item.url.slice(1)
                           ? 'border-blue-500 text-blue-600 dark:text-blue-400 font-medium'
