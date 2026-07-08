@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import rehypeHighlight from 'rehype-highlight';
-import { Menu, X, Sun, Moon, ArrowLeft, Github, Database, BookOpen, Layers, Network, RefreshCw, ShieldCheck, Code, Search, ChevronLeft, ChevronRight, Star, GitFork, Check, Copy } from 'lucide-react';
+import { Menu, X, Sun, Moon, ArrowLeft, Github, Database, BookOpen, Layers, Network, RefreshCw, ShieldCheck, Code, Search, ChevronLeft, ChevronRight, Star, GitFork, Check, Copy, Rocket } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useGithubStats } from '../hooks/useGithubStats';
 import 'highlight.js/styles/atom-one-dark.css'; // Premium dark theme for syntax highlighting
@@ -67,6 +67,7 @@ const DOCS_PAGES: PageDef[] = [
   },
   { id: 'sync-engine', title: 'Sync Engine', icon: RefreshCw },
   { id: 'security', title: 'Security', icon: ShieldCheck },
+  { id: 'deployment', title: 'Deployment', icon: Rocket },
   { id: 'development', title: 'Development & Contributing', icon: Code },
 ];
 

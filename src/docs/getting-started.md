@@ -29,36 +29,3 @@ cp .env.example .env
 # Start the development server
 bun run dev
 ```
-
-## Deployment
-
-ThiruXDB can be easily deployed to modern serverless and PaaS platforms.
-
-### Vercel / Netlify
-
-ThiruXDB is natively configured to run on Serverless platforms like Vercel and Netlify out of the box!
-The repository includes a `vercel.json` config and an `api/index.js` serverless endpoint that perfectly bridges the Express backend with Vercel's Node.js runtime. 
-
-1. Connect your GitHub repository to Vercel.
-2. Set your **Environment Variables** (`MONGODB_URI`, `JWT_SECRET`, etc.).
-3. Deploy! Vercel will automatically build the React frontend and configure the Serverless API endpoints.
-
-### Docker (Self-Hosted VPS)
-
-You can easily package ThiruXDB inside a Docker container for VPS environments (DigitalOcean, AWS, Linode).
-
-```dockerfile
-FROM oven/bun:1
-
-WORKDIR /app
-
-COPY package.json bun.lockb ./
-RUN bun install
-
-COPY . .
-RUN bun run build
-
-EXPOSE 3001
-
-CMD ["bun", "run", "start"]
-```
