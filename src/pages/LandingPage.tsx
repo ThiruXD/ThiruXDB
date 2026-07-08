@@ -39,7 +39,9 @@ export function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4 sm:gap-6">
-            <Link to="/docs" className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition hidden md:flex items-center gap-1.5"><BookOpen className="w-4 h-4" /> Documentation</Link>
+            <Link to="/docs" className="text-sm font-medium text-gray-700 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-3 py-1.5 rounded-md transition hidden md:flex items-center gap-1.5 shadow-sm">
+              <BookOpen className="w-4 h-4" /> Docs
+            </Link>
             <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noreferrer" className="flex items-center gap-3">
               <div className="hidden md:flex items-center gap-3 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-zinc-900 px-2 py-1 rounded-md border border-gray-200 dark:border-zinc-800">
                 <div className="flex items-center gap-1">
@@ -84,7 +86,11 @@ export function LandingPage() {
           <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-gray-100 dark:hover:bg-zinc-800/60 rounded-md transition-colors"><Zap className="w-4 h-4" /> Features</a>
           <a href="#use-cases" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-gray-100 dark:hover:bg-zinc-800/60 rounded-md transition-colors"><Briefcase className="w-4 h-4" /> Use Cases</a>
           <a href="#audience" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-gray-100 dark:hover:bg-zinc-800/60 rounded-md transition-colors"><Users className="w-4 h-4" /> Audience</a>
-          <Link to="/docs" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-gray-100 dark:hover:bg-zinc-800/60 rounded-md transition-colors"><BookOpen className="w-4 h-4" /> Documentation</Link>
+          
+          <div className="my-1"></div>
+          <Link to="/docs" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-900 dark:text-white border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900/40 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors shadow-sm">
+            <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Docs
+          </Link>
           
           <div className="mt-4 border-t border-gray-200 dark:border-zinc-800 pt-4 px-2">
             <a href="https://github.com/ThiruXD/ThiruXDB" target="_blank" rel="noreferrer" className="flex items-center gap-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors">
