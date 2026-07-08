@@ -1,5 +1,7 @@
-import { useLocation, Link as RouterLink } from 'react-router-dom';
-import { RootProvider } from 'fumadocs-ui/provider/react-router';
+import { useLocation, useNavigate, useParams, Link as RouterLink } from 'react-router-dom';
+import { RootProvider as BaseRootProvider } from 'fumadocs-ui/provider/base';
+import { FrameworkProvider } from 'fumadocs-core/framework';
+import { useMemo } from 'react';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsPage as FumaDocsPage, DocsBody, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import ReactMarkdown from 'react-markdown';
@@ -33,27 +35,41 @@ export function DocsPage() {
   const markdownContent =
     (markdownFiles[`../docs/${page.id}.md`] as string) || '# 404 Not Found\n\nThe requested documentation page could not be found.';
 
-  // Extract title and description from markdown if needed, but we have it in DOCS_PAGES
   const contentWithoutH1 = markdownContent.replace(/^#\s+.*$/m, '');
 
+  const navigate = useNavigate();
+  const params = useParams();
+  
+  const router = useMemo(() => ({
+    push: (url: string) => navigate(url),
+    refresh: () => {},
+  }), [navigate]);
+
   return (
-    <RootProvider>
-      <DocsLayout 
-        tree={pageTree}
-        nav={{
-          title: 'ThiruXDB',
-          url: '/',
-        }}
-      >
-        <FumaDocsPage toc={[]}>
-          <DocsTitle>{page.title}</DocsTitle>
-          <DocsBody>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {contentWithoutH1}
-            </ReactMarkdown>
-          </DocsBody>
-        </FumaDocsPage>
-      </DocsLayout>
-    </RootProvider>
+    <FrameworkProvider
+      usePathname={() => location.pathname}
+      useRouter={() => router}
+      useParams={() => params as any}
+      Link={({ href, ...props }: any) => <RouterLink to={href || ''} {...props} />}
+    >
+      <BaseRootProvider>
+        <DocsLayout 
+          tree={pageTree}
+          nav={{
+            title: 'ThiruXDB',
+            url: '/',
+          }}
+        >
+          <FumaDocsPage toc={[]}>
+            <DocsTitle>{page.title}</DocsTitle>
+            <DocsBody>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {contentWithoutH1}
+              </ReactMarkdown>
+            </DocsBody>
+          </FumaDocsPage>
+        </DocsLayout>
+      </BaseRootProvider>
+    </FrameworkProvider>
   );
 }
